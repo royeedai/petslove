@@ -1,0 +1,1 @@
+import{_ as s,c as a,o as c,b as t,d as n,e as r}from"./index-C9AwdplH.js";const p={},_={class:"page-container"};function d(l,e){const o=r("el-empty");return c(),a("div",_,[e[0]||(e[0]=t("div",{class:"page-header"},[t("h2",{class:"page-title"},"评论管理")],-1)),n(o,{description:"功能开发中..."})])}const m=s(p,[["render",d]]);export{m as default};

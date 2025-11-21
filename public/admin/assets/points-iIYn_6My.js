@@ -1,0 +1,1 @@
+import{_ as o,c as a,o as n,b as s,d as c,e as r}from"./index-C9AwdplH.js";const p={},_={class:"page-container"};function d(i,e){const t=r("el-empty");return n(),a("div",_,[e[0]||(e[0]=s("div",{class:"page-header"},[s("h2",{class:"page-title"},"积分管理")],-1)),c(t,{description:"功能开发中..."})])}const m=o(p,[["render",d]]);export{m as default};

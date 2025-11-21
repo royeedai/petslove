@@ -1,0 +1,1 @@
+import{_ as o,c as a,o as c,b as s,d as n,e as r}from"./index-C9AwdplH.js";const p={},_={class:"page-container"};function d(l,e){const t=r("el-empty");return c(),a("div",_,[e[0]||(e[0]=s("div",{class:"page-header"},[s("h2",{class:"page-title"},"帖子管理")],-1)),n(t,{description:"功能开发中..."})])}const m=o(p,[["render",d]]);export{m as default};
