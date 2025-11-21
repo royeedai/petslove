@@ -8,9 +8,10 @@
       
       <view class="user-info-wrapper">
         <image 
-          :src="userInfo?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
+          :src="userInfo?.avatar || defaultAvatar" 
           mode="aspectFill" 
           class="user-avatar"
+          @error="handleAvatarError"
         ></image>
         
         <view class="user-detail">
@@ -52,7 +53,7 @@
     <!-- 快捷功能 -->
     <view class="quick-actions">
       <view class="action-item" @click="navigateTo('/pages/user/verify')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);">
+        <view class="action-icon-wrapper verify">
           <text class="action-icon">✓</text>
         </view>
         <text class="action-text">实名认证</text>
@@ -62,14 +63,14 @@
       </view>
 
       <view class="action-item" @click="navigateTo('/pages/user/favorites')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);">
+        <view class="action-icon-wrapper favorites">
           <text class="action-icon">❤️</text>
         </view>
         <text class="action-text">我的收藏</text>
       </view>
 
       <view class="action-item" @click="navigateTo('/pages/user/messages')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);">
+        <view class="action-icon-wrapper messages">
           <text class="action-icon">📧</text>
         </view>
         <text class="action-text">消息通知</text>
@@ -79,7 +80,7 @@
       </view>
 
       <view class="action-item" @click="navigateTo('/pages/user/wallet')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);">
+        <view class="action-icon-wrapper wallet">
           <text class="action-icon">💰</text>
         </view>
         <text class="action-text">我的钱包</text>
@@ -177,6 +178,8 @@ const userStats = ref({
 })
 const unreadCount = ref(0)
 
+const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
+
 onMounted(() => {
   loadUserInfo()
 })
@@ -207,6 +210,12 @@ const loadUserStats = async () => {
   console.log('加载用户统计数据')
 }
 
+const handleAvatarError = () => {
+  if (userInfo.value) {
+    userInfo.value.avatar = defaultAvatar
+  }
+}
+
 const navigateTo = (url) => {
   if (!userInfo.value && url !== '/pages/login/index') {
     uni.navigateTo({
@@ -221,7 +230,7 @@ const handleLogout = () => {
   uni.showModal({
     title: '退出登录',
     content: '确定要退出登录吗？',
-    confirmColor: '#FF8C42',
+    confirmColor: '#0066CC',
     success: (res) => {
       if (res.confirm) {
         uni.removeStorageSync('token')
@@ -240,7 +249,7 @@ const handleLogout = () => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: #F8F9FA;
+  background: var(--bg-page);
   padding-bottom: 40rpx;
 }
 
@@ -248,15 +257,16 @@ const handleLogout = () => {
 .user-card {
   position: relative;
   margin: 24rpx 24rpx 20rpx;
-  background: #fff;
-  border-radius: 32rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 8rpx 32rpx rgba(255, 140, 66, 0.12);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .user-bg {
   height: 200rpx;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -281,8 +291,9 @@ const handleLogout = () => {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  border: 6rpx solid #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  border: 6rpx solid var(--bg-white);
+  box-shadow: var(--shadow-md);
+  background: var(--bg-gray);
 }
 
 .user-detail {
@@ -299,7 +310,7 @@ const handleLogout = () => {
 .user-nickname {
   font-size: 36rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .verified-badge {
@@ -308,7 +319,7 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: var(--primary-color);
   border-radius: 50%;
 }
 
@@ -320,7 +331,7 @@ const handleLogout = () => {
 
 .user-phone {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
 }
 
 .points-card {
@@ -331,25 +342,26 @@ const handleLogout = () => {
   align-items: center;
   gap: 12rpx;
   padding: 16rpx 24rpx;
-  background: linear-gradient(135deg, rgba(255, 157, 92, 0.15) 0%, rgba(255, 127, 41, 0.15) 100%);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 40rpx;
-  border: 2rpx solid rgba(255, 140, 66, 0.3);
+  border: 1rpx solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-sm);
 }
 
 .points-label {
   font-size: 22rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
 }
 
 .points-value {
   font-size: 28rpx;
   font-weight: 600;
-  color: #FF8C42;
+  color: var(--primary-color);
 }
 
 .points-arrow {
   font-size: 28rpx;
-  color: #FF8C42;
+  color: var(--primary-color);
   font-weight: 300;
 }
 
@@ -360,7 +372,7 @@ const handleLogout = () => {
   justify-content: space-around;
   padding: 32rpx 0 8rpx;
   margin-top: 20rpx;
-  border-top: 1rpx solid #E8EAED;
+  border-top: 1rpx solid var(--divider-color);
 }
 
 .stat-item {
@@ -373,18 +385,18 @@ const handleLogout = () => {
 .stat-value {
   font-size: 32rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .stat-label {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
 }
 
 .stat-divider {
   width: 2rpx;
   height: 60rpx;
-  background: #E8EAED;
+  background: var(--divider-color);
 }
 
 /* 快捷功能 */
@@ -394,9 +406,10 @@ const handleLogout = () => {
   gap: 24rpx;
   padding: 32rpx 24rpx;
   margin: 0 24rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .action-item {
@@ -413,8 +426,24 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  
+  &.verify {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  }
+  
+  &.favorites {
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%);
+  }
+  
+  &.messages {
+    background: linear-gradient(135deg, var(--info-color) 0%, #138496 100%);
+  }
+  
+  &.wallet {
+    background: linear-gradient(135deg, #FFB84D 0%, #FF9500 100%);
+  }
 }
 
 .action-icon {
@@ -423,7 +452,7 @@ const handleLogout = () => {
 
 .action-text {
   font-size: 24rpx;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .action-status {
@@ -435,8 +464,8 @@ const handleLogout = () => {
   border-radius: 20rpx;
   
   &.verified {
-    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
-    color: #28A745;
+    background: var(--success-color);
+    color: #fff;
   }
 }
 
@@ -450,12 +479,12 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FF4757;
+  background: var(--danger-color);
   border-radius: 20rpx;
   font-size: 20rpx;
   color: #fff;
   font-weight: 500;
-  box-shadow: 0 2rpx 8rpx rgba(255, 71, 87, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 /* 菜单组 */
@@ -468,14 +497,15 @@ const handleLogout = () => {
   padding: 20rpx 16rpx 16rpx;
   font-size: 28rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .menu-list {
-  background: #fff;
-  border-radius: 24rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .menu-item {
@@ -483,7 +513,7 @@ const handleLogout = () => {
   align-items: center;
   justify-content: space-between;
   padding: 32rpx;
-  border-bottom: 1rpx solid #F8F9FA;
+  border-bottom: 1rpx solid var(--divider-color);
   transition: all 0.3s ease;
 
   &:last-child {
@@ -491,7 +521,7 @@ const handleLogout = () => {
   }
 
   &:active {
-    background: #F8F9FA;
+    background: var(--bg-gray);
   }
 }
 
@@ -507,12 +537,12 @@ const handleLogout = () => {
 
 .menu-text {
   font-size: 28rpx;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .menu-arrow {
   font-size: 36rpx;
-  color: #95A5A6;
+  color: var(--text-light);
   font-weight: 300;
 }
 
@@ -529,20 +559,29 @@ const handleLogout = () => {
   text-align: center;
   font-size: 30rpx;
   font-weight: 500;
-  border-radius: 16rpx;
+  border-radius: var(--radius-md);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-login {
   color: #fff;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.3);
+  background: var(--primary-color);
+  box-shadow: var(--shadow-md);
+  
+  &:active {
+    background: var(--primary-dark);
+    transform: scale(0.98);
+  }
 }
 
 .btn-logout {
-  color: #7F8C8D;
-  background: #fff;
-  border: 2rpx solid #E8EAED;
+  color: var(--text-secondary);
+  background: var(--bg-white);
+  border: 2rpx solid var(--border-color);
+  
+  &:active {
+    background: var(--bg-gray);
+  }
 }
 </style>

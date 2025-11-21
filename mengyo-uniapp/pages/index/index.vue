@@ -9,12 +9,17 @@
         :duration="500"
         :circular="true"
         indicator-color="rgba(255, 255, 255, 0.5)"
-        indicator-active-color="#FF8C42"
+        indicator-active-color="#0066CC"
         class="banner-swiper"
       >
         <swiper-item v-for="(item, index) in banners" :key="index">
           <view class="banner-item">
-            <image :src="item.imageUrl" mode="aspectFill" class="banner-image"></image>
+            <image 
+              :src="item.imageUrl" 
+              mode="aspectFill" 
+              class="banner-image"
+              @error="handleImageError($event, 'banner', index)"
+            ></image>
             <view class="banner-mask"></view>
           </view>
         </swiper-item>
@@ -25,28 +30,28 @@
     <view class="features-card">
       <view class="features-grid">
         <view class="feature-item" @click="navigateTo('/pages/rescue/list')">
-          <view class="feature-icon-wrapper" style="background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);">
+          <view class="feature-icon-wrapper rescue">
             <text class="feature-icon">🆘</text>
           </view>
           <text class="feature-text">救助任务</text>
         </view>
         
         <view class="feature-item" @click="navigateTo('/pages/animal/list')">
-          <view class="feature-icon-wrapper" style="background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);">
+          <view class="feature-icon-wrapper animal">
             <text class="feature-icon">🐾</text>
           </view>
           <text class="feature-text">流浪动物</text>
         </view>
         
         <view class="feature-item" @click="navigateTo('/pages/donation/index')">
-          <view class="feature-icon-wrapper" style="background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);">
+          <view class="feature-icon-wrapper donation">
             <text class="feature-icon">❤️</text>
           </view>
           <text class="feature-text">爱心捐赠</text>
         </view>
         
         <view class="feature-item" @click="navigateTo('/pages/adoption/index')">
-          <view class="feature-icon-wrapper" style="background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);">
+          <view class="feature-icon-wrapper adoption">
             <text class="feature-icon">🏠</text>
           </view>
           <text class="feature-text">领养申请</text>
@@ -58,28 +63,42 @@
     <view class="section">
       <view class="section-header">
         <view class="header-left">
-          <view class="section-icon">🆘</view>
           <text class="section-title">最新救助</text>
         </view>
         <view class="section-more" @click="navigateTo('/pages/rescue/list')">
-          <text class="more-text">更多</text>
+          <text class="more-text">查看全部</text>
           <text class="more-arrow">›</text>
         </view>
       </view>
       
       <view class="rescue-list" v-if="rescueList.length > 0">
-        <view class="rescue-card" v-for="item in rescueList" :key="item.id">
-          <image :src="item.cover" mode="aspectFill" class="rescue-image"></image>
+        <view 
+          class="rescue-card" 
+          v-for="item in rescueList" 
+          :key="item.id"
+          @click="navigateTo(`/pages/rescue/detail?id=${item.id}`)"
+        >
+          <view class="rescue-image-wrapper">
+            <image 
+              :src="item.cover" 
+              mode="aspectFill" 
+              class="rescue-image"
+              @error="handleImageError($event, 'rescue', item.id)"
+            ></image>
+            <view v-if="item.urgencyLevel === 'urgent'" class="urgent-badge">
+              紧急
+            </view>
+          </view>
           <view class="rescue-content">
             <text class="rescue-title">{{ item.title }}</text>
             <view class="rescue-meta">
               <view class="meta-item">
                 <text class="meta-icon">📍</text>
-                <text class="meta-text">{{ item.address }}</text>
+                <text class="meta-text">{{ item.address || '位置待确认' }}</text>
               </view>
-              <view class="rescue-status urgent">
-                紧急
-              </view>
+            </view>
+            <view class="rescue-desc" v-if="item.description">
+              {{ item.description }}
             </view>
           </view>
         </view>
@@ -95,33 +114,42 @@
     <view class="section">
       <view class="section-header">
         <view class="header-left">
-          <view class="section-icon">💬</view>
           <text class="section-title">社区动态</text>
         </view>
         <view class="section-more" @click="navigateTo('/pages/community/list')">
-          <text class="more-text">更多</text>
+          <text class="more-text">查看全部</text>
           <text class="more-arrow">›</text>
         </view>
       </view>
       
       <view class="post-list" v-if="postList.length > 0">
-        <view class="post-card" v-for="item in postList" :key="item.id">
+        <view 
+          class="post-card" 
+          v-for="item in postList" 
+          :key="item.id"
+          @click="navigateTo(`/pages/community/detail?id=${item.id}`)"
+        >
           <view class="post-header">
-            <image :src="item.userAvatar" mode="aspectFill" class="user-avatar"></image>
+            <image 
+              :src="item.userAvatar" 
+              mode="aspectFill" 
+              class="user-avatar"
+              @error="handleImageError($event, 'avatar', item.userId)"
+            ></image>
             <view class="user-info">
-              <text class="user-nickname">{{ item.userNickname }}</text>
-              <text class="post-time">刚刚</text>
+              <text class="user-nickname">{{ item.userNickname || '匿名用户' }}</text>
+              <text class="post-time">{{ formatTime(item.createTime) }}</text>
             </view>
           </view>
           <text class="post-content">{{ item.content }}</text>
           <view class="post-actions">
             <view class="action-item">
               <text class="action-icon">👍</text>
-              <text class="action-text">点赞</text>
+              <text class="action-text">{{ item.likeCount || 0 }}</text>
             </view>
             <view class="action-item">
               <text class="action-icon">💬</text>
-              <text class="action-text">评论</text>
+              <text class="action-text">{{ item.commentCount || 0 }}</text>
             </view>
           </view>
         </view>
@@ -153,6 +181,13 @@ const banners = ref([
 const rescueList = ref([])
 const postList = ref([])
 
+// 默认图片
+const defaultImages = {
+  banner: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800&q=80',
+  rescue: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80',
+  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
+}
+
 onMounted(() => {
   loadData()
 })
@@ -164,7 +199,7 @@ const loadData = async () => {
     if (rescueRes.data && rescueRes.data.records) {
       rescueList.value = rescueRes.data.records.map(item => ({
         ...item,
-        cover: item.cover || 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80'
+        cover: item.cover || defaultImages.rescue
       }))
     }
   } catch (error) {
@@ -177,12 +212,48 @@ const loadData = async () => {
     if (postRes.data && postRes.data.records) {
       postList.value = postRes.data.records.map(item => ({
         ...item,
-        userAvatar: item.userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + item.userId
+        userAvatar: item.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userId || 'default'}`,
+        likeCount: item.likeCount || 0,
+        commentCount: item.commentCount || 0
       }))
     }
   } catch (error) {
     console.error('加载社区动态失败', error)
   }
+}
+
+const handleImageError = (e, type, id) => {
+  console.log('图片加载失败', type, id)
+  // 设置默认图片
+  if (type === 'banner') {
+    banners.value[id].imageUrl = defaultImages.banner
+  } else if (type === 'rescue') {
+    const item = rescueList.value.find(r => r.id === id)
+    if (item) item.cover = defaultImages.rescue
+  } else if (type === 'avatar') {
+    const item = postList.value.find(p => p.userId === id)
+    if (item) item.userAvatar = defaultImages.avatar
+  }
+}
+
+const formatTime = (time) => {
+  if (!time) return '刚刚'
+  
+  const now = new Date()
+  const createTime = new Date(time)
+  const diff = now - createTime
+  
+  const minutes = Math.floor(diff / 1000 / 60)
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}小时前`
+  
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}天前`
+  
+  return createTime.toLocaleDateString()
 }
 
 const navigateTo = (url) => {
@@ -193,19 +264,19 @@ const navigateTo = (url) => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #FFF5EE 0%, #F8F9FA 100%);
+  background: var(--bg-page);
   padding-bottom: 20rpx;
 }
 
 /* 轮播图 */
 .banner-wrapper {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   overflow: hidden;
 }
 
 .banner-swiper {
   width: 100%;
-  height: 380rpx;
+  height: 360rpx;
 }
 
 .banner-item {
@@ -217,6 +288,7 @@ const navigateTo = (url) => {
 .banner-image {
   width: 100%;
   height: 100%;
+  background: var(--bg-gray);
 }
 
 .banner-mask {
@@ -224,40 +296,62 @@ const navigateTo = (url) => {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 160rpx;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  height: 120rpx;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
 }
 
 /* 功能入口卡片 */
 .features-card {
-  margin: 0 24rpx 20rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 40rpx 20rpx;
-  box-shadow: 0 8rpx 32rpx rgba(255, 140, 66, 0.08);
+  margin: 0 24rpx 24rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: 32rpx 24rpx;
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .features-grid {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24rpx;
 }
 
 .feature-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .feature-icon-wrapper {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 24rpx;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.15);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
+  
+  &.rescue {
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%);
+  }
+  
+  &.animal {
+    background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+  }
+  
+  &.donation {
+    background: linear-gradient(135deg, #FFB84D 0%, #FF9500 100%);
+  }
+  
+  &.adoption {
+    background: linear-gradient(135deg, #28A745 0%, #1E7E34 100%);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .feature-icon {
@@ -265,18 +359,19 @@ const navigateTo = (url) => {
 }
 
 .feature-text {
-  font-size: 26rpx;
-  color: #2C3E50;
+  font-size: 24rpx;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 /* 通用区块样式 */
 .section {
-  margin: 0 24rpx 20rpx;
-  background: #fff;
-  border-radius: 24rpx;
+  margin: 0 24rpx 24rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   padding: 32rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .section-header {
@@ -284,6 +379,8 @@ const navigateTo = (url) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid var(--divider-color);
 }
 
 .header-left {
@@ -292,14 +389,10 @@ const navigateTo = (url) => {
   gap: 12rpx;
 }
 
-.section-icon {
-  font-size: 36rpx;
-}
-
 .section-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .section-more {
@@ -310,12 +403,12 @@ const navigateTo = (url) => {
 
 .more-text {
   font-size: 26rpx;
-  color: #95A5A6;
+  color: var(--primary-color);
 }
 
 .more-arrow {
-  font-size: 32rpx;
-  color: #95A5A6;
+  font-size: 28rpx;
+  color: var(--primary-color);
   font-weight: 300;
 }
 
@@ -323,23 +416,46 @@ const navigateTo = (url) => {
 .rescue-list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 24rpx;
 }
 
 .rescue-card {
   display: flex;
   gap: 20rpx;
   padding: 20rpx;
-  background: #F8F9FA;
-  border-radius: 16rpx;
+  background: var(--bg-gray);
+  border-radius: var(--radius-md);
   transition: all 0.3s ease;
+  border: 1rpx solid var(--border-color);
+  
+  &:active {
+    background: #F0F0F0;
+    transform: scale(0.98);
+  }
+}
+
+.rescue-image-wrapper {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .rescue-image {
-  width: 180rpx;
-  height: 180rpx;
-  border-radius: 12rpx;
-  flex-shrink: 0;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: var(--radius-md);
+  background: var(--bg-gray);
+}
+
+.urgent-badge {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  padding: 6rpx 16rpx;
+  background: var(--danger-color);
+  color: #fff;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  font-weight: 500;
 }
 
 .rescue-content {
@@ -347,13 +463,15 @@ const navigateTo = (url) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .rescue-title {
   font-size: 30rpx;
-  font-weight: 500;
-  color: #2C3E50;
+  font-weight: 600;
+  color: var(--text-primary);
   line-height: 1.4;
+  margin-bottom: 12rpx;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -363,34 +481,38 @@ const navigateTo = (url) => {
 .rescue-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  margin-bottom: 12rpx;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 6rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .meta-icon {
   font-size: 24rpx;
+  flex-shrink: 0;
 }
 
 .meta-text {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.rescue-status {
-  padding: 8rpx 20rpx;
-  border-radius: 20rpx;
-  font-size: 22rpx;
-  font-weight: 500;
-  
-  &.urgent {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
-    color: #FF6B35;
-  }
+.rescue-desc {
+  font-size: 24rpx;
+  color: var(--text-light);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 社区动态 */
@@ -402,8 +524,15 @@ const navigateTo = (url) => {
 
 .post-card {
   padding: 24rpx;
-  background: #F8F9FA;
-  border-radius: 16rpx;
+  background: var(--bg-gray);
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--border-color);
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: #F0F0F0;
+    transform: scale(0.98);
+  }
 }
 
 .post-header {
@@ -417,30 +546,33 @@ const navigateTo = (url) => {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  border: 3rpx solid #fff;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+  border: 2rpx solid var(--border-color);
+  background: var(--bg-gray);
+  flex-shrink: 0;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
   gap: 4rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .user-nickname {
   font-size: 28rpx;
   font-weight: 500;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .post-time {
   font-size: 22rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 .post-content {
   font-size: 28rpx;
-  color: #34495E;
+  color: var(--text-primary);
   line-height: 1.6;
   margin-bottom: 16rpx;
   display: -webkit-box;
@@ -451,16 +583,15 @@ const navigateTo = (url) => {
 
 .post-actions {
   display: flex;
-  gap: 40rpx;
+  gap: 32rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--divider-color);
 }
 
 .action-item {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: 8rpx 16rpx;
-  background: #fff;
-  border-radius: 20rpx;
 }
 
 .action-icon {
@@ -469,7 +600,7 @@ const navigateTo = (url) => {
 
 .action-text {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
 }
 
 /* 空状态 */
@@ -479,16 +610,16 @@ const navigateTo = (url) => {
   align-items: center;
   justify-content: center;
   padding: 80rpx 0;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .empty-icon {
   font-size: 80rpx;
-  opacity: 0.4;
+  opacity: 0.3;
 }
 
 .empty-text {
   font-size: 26rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 </style>

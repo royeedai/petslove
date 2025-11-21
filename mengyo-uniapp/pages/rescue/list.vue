@@ -28,7 +28,7 @@
     </view>
 
     <!-- 状态筛选 -->
-    <scroll-view scroll-x class="status-scroll">
+    <scroll-view scroll-x class="status-scroll" :show-scrollbar="false">
       <view class="status-list">
         <view 
           v-for="(item, index) in statusTabs" 
@@ -57,7 +57,14 @@
           <text class="urgent-text">紧急求助</text>
         </view>
 
-        <image :src="item.cover" mode="aspectFill" class="rescue-image"></image>
+        <view class="rescue-image-wrapper">
+          <image 
+            :src="item.cover" 
+            mode="aspectFill" 
+            class="rescue-image"
+            @error="handleImageError($event, item.id)"
+          ></image>
+        </view>
         
         <view class="rescue-content">
           <text class="rescue-title">{{ item.title }}</text>
@@ -66,7 +73,7 @@
             <view class="meta-row">
               <view class="meta-item">
                 <text class="meta-icon">📍</text>
-                <text class="meta-text">{{ item.address }}</text>
+                <text class="meta-text">{{ item.address || '位置待确认' }}</text>
               </view>
             </view>
             
@@ -77,12 +84,12 @@
               </view>
               <view class="meta-item">
                 <text class="meta-icon">👤</text>
-                <text class="meta-text">{{ item.reporterName }}</text>
+                <text class="meta-text">{{ item.reporterName || '匿名' }}</text>
               </view>
             </view>
           </view>
 
-          <view class="rescue-desc">
+          <view class="rescue-desc" v-if="item.description">
             {{ item.description }}
           </view>
 
@@ -98,7 +105,6 @@
                 class="btn-participate"
                 @click.stop="handleParticipate(item)"
               >
-                <text class="btn-icon">🙋</text>
                 <text class="btn-text">我要参与</text>
               </button>
               <button 
@@ -106,7 +112,6 @@
                 class="btn-detail"
                 @click.stop="handleProgress(item)"
               >
-                <text class="btn-icon">📊</text>
                 <text class="btn-text">查看进度</text>
               </button>
             </view>
@@ -124,7 +129,7 @@
 
     <!-- 发布救助按钮 -->
     <view class="fab-btn" @click="handlePublish">
-      <text class="fab-icon">📝</text>
+      <text class="fab-icon">+</text>
     </view>
   </view>
 </template>
@@ -147,6 +152,8 @@ const statusTabs = ref([
 ])
 
 const rescueList = ref([])
+
+const defaultRescueImage = 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80'
 
 onMounted(() => {
   loadData()
@@ -172,23 +179,25 @@ const loadData = async () => {
     if (res.data && res.data.records) {
       rescueList.value = res.data.records.map(item => ({
         ...item,
-        cover: item.cover || 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80'
+        cover: item.cover || defaultRescueImage
       }))
     }
   } catch (error) {
     console.error('加载救助任务列表失败', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none'
+    })
   }
 }
 
 const loadStats = async () => {
   try {
-    // 加载统计数据（这里使用列表数据统计）
     const res = await rescueApi.getTaskList({ page: 1, size: 100 })
     if (res.data && res.data.records) {
       const records = res.data.records
       totalRescue.value = records.filter(r => r.status === 'pending' || r.status === 'processing').length
       completedRescue.value = records.filter(r => r.status === 'completed').length
-      // 志愿者数量需要从后端获取，这里暂时设置为固定值
       totalVolunteer.value = 128
     }
   } catch (error) {
@@ -196,10 +205,17 @@ const loadStats = async () => {
   }
 }
 
+const handleImageError = (e, id) => {
+  console.log('图片加载失败', id)
+  const item = rescueList.value.find(r => r.id === id)
+  if (item) {
+    item.cover = defaultRescueImage
+  }
+}
+
 const handleDetail = (item) => {
-  uni.showToast({
-    title: '详情页面开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: `/pages/rescue/detail?id=${item.id}`
   })
 }
 
@@ -207,17 +223,25 @@ const handleParticipate = async (item) => {
   uni.showModal({
     title: '确认参与',
     content: '确定要参与这个救助任务吗？',
+    confirmColor: '#0066CC',
     success: async (res) => {
       if (res.confirm) {
         try {
+          uni.showLoading({ title: '提交中...' })
           await rescueApi.acceptTask(item.id)
+          uni.hideLoading()
           uni.showToast({
             title: '参与成功',
             icon: 'success'
           })
           loadData()
         } catch (error) {
+          uni.hideLoading()
           console.error('参与救助失败', error)
+          uni.showToast({
+            title: '参与失败，请重试',
+            icon: 'none'
+          })
         }
       }
     }
@@ -225,16 +249,14 @@ const handleParticipate = async (item) => {
 }
 
 const handleProgress = (item) => {
-  uni.showToast({
-    title: '进度页面开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: `/pages/rescue/progress?id=${item.id}`
   })
 }
 
 const handlePublish = () => {
-  uni.showToast({
-    title: '发布页面开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: '/pages/rescue/publish'
   })
 }
 
@@ -272,7 +294,7 @@ const formatTime = (time) => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: #F8F9FA;
+  background: var(--bg-page);
   padding-bottom: 120rpx;
 }
 
@@ -283,9 +305,10 @@ const formatTime = (time) => {
   justify-content: space-around;
   padding: 32rpx 24rpx;
   margin: 24rpx;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 32rpx rgba(255, 140, 66, 0.25);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .stat-item {
@@ -307,26 +330,27 @@ const formatTime = (time) => {
 .stat-value {
   font-size: 32rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .stat-label {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-light);
 }
 
 .stat-divider {
   width: 2rpx;
   height: 60rpx;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--divider-color);
 }
 
 /* 状态筛选 */
 .status-scroll {
   white-space: nowrap;
-  background: #fff;
+  background: var(--bg-white);
   padding: 20rpx 0;
   margin-bottom: 16rpx;
+  border-bottom: 1rpx solid var(--border-color);
 }
 
 .status-list {
@@ -340,16 +364,23 @@ const formatTime = (time) => {
   align-items: center;
   gap: 8rpx;
   padding: 16rpx 32rpx;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   border-radius: 40rpx;
+  border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
+  white-space: nowrap;
 
   &.active {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     
     .status-text {
-      color: #FF8C42;
+      color: #fff;
       font-weight: 600;
+    }
+    
+    .status-emoji {
+      filter: brightness(1.2);
     }
   }
 }
@@ -360,7 +391,7 @@ const formatTime = (time) => {
 
 .status-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -374,11 +405,17 @@ const formatTime = (time) => {
 
 .rescue-card {
   position: relative;
-  background: #fff;
-  border-radius: 24rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .urgent-tag {
@@ -389,7 +426,7 @@ const formatTime = (time) => {
   align-items: center;
   gap: 8rpx;
   padding: 12rpx 24rpx;
-  background: rgba(255, 71, 87, 0.95);
+  background: rgba(220, 53, 69, 0.95);
   border-radius: 40rpx;
   z-index: 10;
   backdrop-filter: blur(10rpx);
@@ -415,10 +452,16 @@ const formatTime = (time) => {
   color: #fff;
 }
 
-.rescue-image {
+.rescue-image-wrapper {
   width: 100%;
   height: 360rpx;
-  background: linear-gradient(135deg, #F8F9FA 0%, #E8EAED 100%);
+  overflow: hidden;
+}
+
+.rescue-image {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-gray);
 }
 
 .rescue-content {
@@ -428,7 +471,7 @@ const formatTime = (time) => {
 .rescue-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
   line-height: 1.4;
   margin-bottom: 20rpx;
   display: -webkit-box;
@@ -454,20 +497,26 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   gap: 8rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .meta-icon {
   font-size: 28rpx;
+  flex-shrink: 0;
 }
 
 .meta-text {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rescue-desc {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 20rpx;
   display: -webkit-box;
@@ -481,7 +530,7 @@ const formatTime = (time) => {
   align-items: center;
   justify-content: space-between;
   padding-top: 20rpx;
-  border-top: 1rpx solid #E8EAED;
+  border-top: 1rpx solid var(--divider-color);
 }
 
 .status-badge {
@@ -494,38 +543,38 @@ const formatTime = (time) => {
   font-weight: 500;
 
   &.pending {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
+    background: #FFF3E0;
     
     .status-dot {
-      background: #FF8C42;
+      background: var(--warning-color);
     }
     
     .status-text {
-      color: #FF8C42;
+      color: var(--warning-color);
     }
   }
 
   &.processing {
-    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
+    background: #E8F5E9;
     
     .status-dot {
-      background: #28A745;
+      background: var(--success-color);
     }
     
     .status-text {
-      color: #28A745;
+      color: var(--success-color);
     }
   }
 
   &.completed {
-    background: linear-gradient(135deg, #D1ECF1 0%, #BEE5EB 100%);
+    background: #E3F2FD;
     
     .status-dot {
-      background: #17A2B8;
+      background: var(--primary-color);
     }
     
     .status-text {
-      color: #17A2B8;
+      color: var(--primary-color);
     }
   }
 }
@@ -545,32 +594,36 @@ const formatTime = (time) => {
 .btn-detail {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  justify-content: center;
   padding: 12rpx 28rpx;
   border-radius: 40rpx;
   border: none;
   font-size: 26rpx;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .btn-participate {
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: var(--primary-color);
   color: #fff;
-  box-shadow: 0 4rpx 12rpx rgba(255, 140, 66, 0.3);
+  box-shadow: var(--shadow-sm);
+  
+  &:active {
+    background: var(--primary-dark);
+  }
 }
 
 .btn-detail {
-  background: #F8F9FA;
-  color: #7F8C8D;
-}
-
-.btn-icon {
-  font-size: 28rpx;
+  background: var(--bg-gray);
+  color: var(--text-secondary);
+  
+  &:active {
+    background: #E0E0E0;
+  }
 }
 
 .btn-text {
   font-size: 26rpx;
-  font-weight: 500;
 }
 
 /* 空状态 */
@@ -590,13 +643,13 @@ const formatTime = (time) => {
 
 .empty-text {
   font-size: 28rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .empty-desc {
   font-size: 24rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 /* 发布按钮 */
@@ -609,14 +662,21 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: var(--primary-color);
   border-radius: 50%;
-  box-shadow: 0 8rpx 32rpx rgba(255, 140, 66, 0.4);
+  box-shadow: var(--shadow-lg);
   z-index: 100;
   transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+    background: var(--primary-dark);
+  }
 }
 
 .fab-icon {
   font-size: 52rpx;
+  color: #fff;
+  font-weight: 300;
 }
 </style>
