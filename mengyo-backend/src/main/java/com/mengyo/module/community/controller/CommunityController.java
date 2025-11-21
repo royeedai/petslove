@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Tag(name = "社区管理")
 @RestController
-@RequestMapping("/api/community")
+@RequestMapping("/community")
 @RequiredArgsConstructor
 public class CommunityController {
 
