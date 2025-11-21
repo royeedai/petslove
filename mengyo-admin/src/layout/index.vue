@@ -2,8 +2,8 @@
   <el-container class="layout-container">
     <el-aside :width="isCollapse ? '64px' : '200px'" class="layout-aside">
       <div class="logo">
-        <img src="@/assets/logo.png" alt="Logo" v-if="!isCollapse">
-        <span v-if="!isCollapse">萌友益站</span>
+        <span v-if="!isCollapse">🐾 萌友益站</span>
+        <span v-else>🐾</span>
       </div>
       <el-menu
         :default-active="activeMenu"
@@ -109,11 +109,6 @@ const handleCommand = (command) => {
     color: #fff;
     font-size: 18px;
     font-weight: bold;
-    
-    img {
-      height: 32px;
-      margin-right: 8px;
-    }
   }
   
   .el-menu {
