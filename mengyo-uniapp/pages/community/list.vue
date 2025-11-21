@@ -3,9 +3,10 @@
     <!-- 顶部发布入口 -->
     <view class="publish-bar" @click="handlePublish">
       <image 
-        :src="userInfo?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
+        :src="userInfo?.avatar || defaultAvatar" 
         mode="aspectFill" 
         class="user-avatar"
+        @error="handleAvatarError"
       ></image>
       <view class="publish-input">
         <text class="publish-placeholder">分享你的爱宠故事...</text>
@@ -16,7 +17,7 @@
     </view>
 
     <!-- 分类标签 -->
-    <scroll-view scroll-x class="category-scroll">
+    <scroll-view scroll-x class="category-scroll" :show-scrollbar="false">
       <view class="category-list">
         <view 
           v-for="(item, index) in categories" 
@@ -37,6 +38,7 @@
         v-for="item in postList" 
         :key="item.id" 
         class="post-card"
+        @click="handleDetail(item)"
       >
         <!-- 用户信息 -->
         <view class="post-header">
@@ -44,19 +46,20 @@
             :src="item.userAvatar" 
             mode="aspectFill" 
             class="avatar"
-            @click="handleUserProfile(item.userId)"
+            @error="handleImageError($event, 'avatar', item.userId)"
+            @click.stop="handleUserProfile(item.userId)"
           ></image>
           <view class="user-info">
-            <text class="nickname">{{ item.userNickname }}</text>
+            <text class="nickname">{{ item.userNickname || '匿名用户' }}</text>
             <text class="time">{{ formatTime(item.createTime) }}</text>
           </view>
-          <view class="more-btn" @click="handleMore(item)">
+          <view class="more-btn" @click.stop="handleMore(item)">
             <text class="more-icon">⋯</text>
           </view>
         </view>
 
         <!-- 动态内容 -->
-        <view class="post-content">
+        <view class="post-content" v-if="item.content">
           <text class="content-text">{{ item.content }}</text>
         </view>
 
@@ -68,7 +71,8 @@
             :src="img" 
             mode="aspectFill" 
             class="post-image"
-            @click="previewImage(item.images, imgIndex)"
+            @error="handleImageError($event, 'image', imgIndex)"
+            @click.stop="previewImage(item.images, imgIndex)"
           ></image>
         </view>
 
@@ -78,7 +82,7 @@
             v-for="(tag, tagIndex) in item.tags" 
             :key="tagIndex"
             class="tag-item"
-            @click="handleTag(tag)"
+            @click.stop="handleTag(tag)"
           >
             #{{ tag }}
           </view>
@@ -86,7 +90,7 @@
 
         <!-- 互动区域 -->
         <view class="post-actions">
-          <view class="action-item" @click="handleLike(item)">
+          <view class="action-item" @click.stop="handleLike(item)">
             <text class="action-icon" :class="{ liked: item.isLiked }">
               {{ item.isLiked ? '❤️' : '🤍' }}
             </text>
@@ -95,14 +99,14 @@
             </text>
           </view>
 
-          <view class="action-item" @click="handleComment(item)">
+          <view class="action-item" @click.stop="handleComment(item)">
             <text class="action-icon">💬</text>
             <text class="action-text">
               {{ item.commentCount > 0 ? item.commentCount : '评论' }}
             </text>
           </view>
 
-          <view class="action-item" @click="handleShare(item)">
+          <view class="action-item" @click.stop="handleShare(item)">
             <text class="action-icon">📤</text>
             <text class="action-text">分享</text>
           </view>
@@ -118,7 +122,7 @@
             <text class="comment-user">{{ comment.userNickname }}：</text>
             <text class="comment-content">{{ comment.content }}</text>
           </view>
-          <view v-if="item.commentCount > 2" class="view-all-comments" @click="handleComment(item)">
+          <view v-if="item.commentCount > 2" class="view-all-comments" @click.stop="handleComment(item)">
             查看全部 {{ item.commentCount }} 条评论 ›
           </view>
         </view>
@@ -140,6 +144,8 @@ import { communityApi } from '@/utils/api'
 
 const userInfo = ref(null)
 const currentCategory = ref('all')
+
+const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
 
 const categories = ref([
   { label: '全部', value: 'all', emoji: '📋' },
@@ -182,12 +188,32 @@ const loadData = async () => {
     if (res.data && res.data.records) {
       postList.value = res.data.records.map(item => ({
         ...item,
-        userAvatar: item.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userId}`,
-        isLiked: false
+        userAvatar: item.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userId || 'default'}`,
+        isLiked: false,
+        likeCount: item.likeCount || 0,
+        commentCount: item.commentCount || 0
       }))
     }
   } catch (error) {
     console.error('加载社区动态失败', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none'
+    })
+  }
+}
+
+const handleAvatarError = () => {
+  if (userInfo.value) {
+    userInfo.value.avatar = defaultAvatar
+  }
+}
+
+const handleImageError = (e, type, id) => {
+  console.log('图片加载失败', type, id)
+  if (type === 'avatar') {
+    const item = postList.value.find(p => p.userId === id)
+    if (item) item.userAvatar = defaultAvatar
   }
 }
 
@@ -198,16 +224,14 @@ const handlePublish = () => {
     })
     return
   }
-  uni.showToast({
-    title: '发布页面开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: '/pages/community/publish'
   })
 }
 
 const handleUserProfile = (userId) => {
-  uni.showToast({
-    title: '用户主页开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: `/pages/user/profile?userId=${userId}`
   })
 }
 
@@ -238,6 +262,10 @@ const handleLike = async (item) => {
     }
   } catch (error) {
     console.error('点赞失败', error)
+    uni.showToast({
+      title: '操作失败，请重试',
+      icon: 'none'
+    })
   }
 }
 
@@ -249,9 +277,8 @@ const handleComment = (item) => {
     return
   }
   
-  uni.showToast({
-    title: '评论功能开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: `/pages/community/detail?id=${item.id}`
   })
 }
 
@@ -263,6 +290,13 @@ const handleShare = (item) => {
 
 const handleTag = (tag) => {
   console.log('点击标签：', tag)
+  // 可以跳转到标签页面
+}
+
+const handleDetail = (item) => {
+  uni.navigateTo({
+    url: `/pages/community/detail?id=${item.id}`
+  })
 }
 
 const previewImage = (images, current) => {
@@ -303,7 +337,7 @@ const formatTime = (time) => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: #F8F9FA;
+  background: var(--bg-page);
   padding-bottom: 20rpx;
 }
 
@@ -314,16 +348,19 @@ const formatTime = (time) => {
   gap: 20rpx;
   padding: 24rpx;
   margin: 24rpx 24rpx 16rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
 }
 
 .user-avatar {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  border: 3rpx solid #F8F9FA;
+  border: 2rpx solid var(--border-color);
+  background: var(--bg-gray);
+  flex-shrink: 0;
 }
 
 .publish-input {
@@ -332,13 +369,14 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   padding: 0 24rpx;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   border-radius: 40rpx;
+  border: 1rpx solid var(--border-color);
 }
 
 .publish-placeholder {
   font-size: 26rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 .publish-btn {
@@ -347,9 +385,15 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: var(--primary-color);
   border-radius: 50%;
-  box-shadow: 0 4rpx 16rpx rgba(255, 140, 66, 0.3);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+    background: var(--primary-dark);
+  }
 }
 
 .publish-icon {
@@ -359,9 +403,10 @@ const formatTime = (time) => {
 /* 分类滚动 */
 .category-scroll {
   white-space: nowrap;
-  background: #fff;
+  background: var(--bg-white);
   padding: 20rpx 0;
   margin-bottom: 16rpx;
+  border-bottom: 1rpx solid var(--border-color);
 }
 
 .category-list {
@@ -375,16 +420,23 @@ const formatTime = (time) => {
   align-items: center;
   gap: 8rpx;
   padding: 16rpx 32rpx;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   border-radius: 40rpx;
+  border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
+  white-space: nowrap;
 
   &.active {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     
     .category-text {
-      color: #FF8C42;
+      color: #fff;
       font-weight: 600;
+    }
+    
+    .category-emoji {
+      filter: brightness(1.2);
     }
   }
 }
@@ -395,7 +447,7 @@ const formatTime = (time) => {
 
 .category-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -408,10 +460,17 @@ const formatTime = (time) => {
 }
 
 .post-card {
-  background: #fff;
-  border-radius: 24rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   padding: 28rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .post-header {
@@ -424,7 +483,9 @@ const formatTime = (time) => {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  border: 3rpx solid #F8F9FA;
+  border: 2rpx solid var(--border-color);
+  background: var(--bg-gray);
+  flex-shrink: 0;
 }
 
 .user-info {
@@ -433,17 +494,18 @@ const formatTime = (time) => {
   display: flex;
   flex-direction: column;
   gap: 6rpx;
+  min-width: 0;
 }
 
 .nickname {
   font-size: 28rpx;
   font-weight: 500;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .time {
   font-size: 22rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 .more-btn {
@@ -452,11 +514,12 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .more-icon {
   font-size: 36rpx;
-  color: #95A5A6;
+  color: var(--text-light);
   line-height: 1;
 }
 
@@ -467,7 +530,7 @@ const formatTime = (time) => {
 
 .content-text {
   font-size: 28rpx;
-  color: #2C3E50;
+  color: var(--text-primary);
   line-height: 1.6;
   word-break: break-all;
 }
@@ -513,8 +576,8 @@ const formatTime = (time) => {
 
 .post-image {
   width: 100%;
-  border-radius: 12rpx;
-  background: #F8F9FA;
+  border-radius: var(--radius-md);
+  background: var(--bg-gray);
 }
 
 /* 标签 */
@@ -527,10 +590,11 @@ const formatTime = (time) => {
 
 .tag-item {
   padding: 8rpx 20rpx;
-  background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
+  background: #E3F2FD;
   border-radius: 20rpx;
   font-size: 24rpx;
-  color: #FF8C42;
+  color: var(--primary-color);
+  border: 1rpx solid rgba(0, 102, 204, 0.2);
 }
 
 /* 互动区域 */
@@ -539,7 +603,7 @@ const formatTime = (time) => {
   align-items: center;
   gap: 48rpx;
   padding-top: 20rpx;
-  border-top: 1rpx solid #E8EAED;
+  border-top: 1rpx solid var(--divider-color);
 }
 
 .action-item {
@@ -547,9 +611,13 @@ const formatTime = (time) => {
   align-items: center;
   gap: 12rpx;
   padding: 8rpx 16rpx;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   border-radius: 40rpx;
   transition: all 0.3s ease;
+  
+  &:active {
+    background: #E0E0E0;
+  }
 }
 
 .action-icon {
@@ -572,10 +640,10 @@ const formatTime = (time) => {
 
 .action-text {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   
   &.active {
-    color: #FF8C42;
+    color: var(--primary-color);
     font-weight: 500;
   }
 }
@@ -584,7 +652,7 @@ const formatTime = (time) => {
 .comments-preview {
   margin-top: 20rpx;
   padding-top: 20rpx;
-  border-top: 1rpx solid #E8EAED;
+  border-top: 1rpx solid var(--divider-color);
 }
 
 .comment-item {
@@ -594,17 +662,17 @@ const formatTime = (time) => {
 }
 
 .comment-user {
-  color: #7F8C8D;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
 .comment-content {
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .view-all-comments {
   font-size: 24rpx;
-  color: #95A5A6;
+  color: var(--text-light);
   margin-top: 12rpx;
 }
 
@@ -625,12 +693,12 @@ const formatTime = (time) => {
 
 .empty-text {
   font-size: 28rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .empty-desc {
   font-size: 24rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 </style>

@@ -18,7 +18,7 @@
     </view>
 
     <!-- 分类标签 -->
-    <scroll-view scroll-x class="category-scroll">
+    <scroll-view scroll-x class="category-scroll" :show-scrollbar="false">
       <view class="category-list">
         <view 
           v-for="(item, index) in categories" 
@@ -41,15 +41,22 @@
         class="animal-card"
         @click="handleDetail(item)"
       >
-        <image :src="item.photo" mode="aspectFill" class="animal-image"></image>
-        
-        <!-- 徽章标签 -->
-        <view class="badge-wrapper">
-          <view v-if="item.isUrgent" class="badge urgent">
-            🚨 紧急
-          </view>
-          <view v-if="item.healthStatus === 'injured'" class="badge health">
-            🏥 受伤
+        <view class="animal-image-wrapper">
+          <image 
+            :src="item.photo" 
+            mode="aspectFill" 
+            class="animal-image"
+            @error="handleImageError($event, item.id)"
+          ></image>
+          
+          <!-- 徽章标签 -->
+          <view class="badge-wrapper">
+            <view v-if="item.isUrgent" class="badge urgent">
+              紧急
+            </view>
+            <view v-if="item.healthStatus === 'injured'" class="badge health">
+              受伤
+            </view>
           </view>
         </view>
 
@@ -64,20 +71,20 @@
           <view class="info-row">
             <view class="info-item">
               <text class="info-label">品种</text>
-              <text class="info-value">{{ item.breed }}</text>
+              <text class="info-value">{{ item.breed || '未知' }}</text>
             </view>
             <view class="info-item">
               <text class="info-label">年龄</text>
-              <text class="info-value">{{ item.age }}</text>
+              <text class="info-value">{{ item.age || '未知' }}</text>
             </view>
           </view>
 
-          <view class="info-row">
+          <view class="info-row location-row">
             <text class="location-icon">📍</text>
-            <text class="location-text">{{ item.location }}</text>
+            <text class="location-text">{{ item.location || '位置待确认' }}</text>
           </view>
 
-          <view class="info-desc">
+          <view class="info-desc" v-if="item.description">
             {{ item.description }}
           </view>
 
@@ -90,7 +97,6 @@
                 <text class="btn-icon">{{ item.isLiked ? '❤️' : '🤍' }}</text>
               </button>
               <button class="btn-action primary" @click.stop="handleAdopt(item)">
-                <text class="btn-icon">🏠</text>
                 <text class="btn-text">领养</text>
               </button>
             </view>
@@ -186,6 +192,15 @@ const healthOptions = ref([
 
 const animalList = ref([])
 
+const defaultAnimalImage = (type) => {
+  const imageMap = {
+    'dog': 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&q=80',
+    'cat': 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80',
+    'other': 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&q=80'
+  }
+  return imageMap[type] || imageMap['other']
+}
+
 onMounted(() => {
   loadData()
 })
@@ -213,6 +228,10 @@ const loadData = async () => {
       params.healthStatus = filterHealth.value
     }
     
+    if (keyword.value) {
+      params.keyword = keyword.value
+    }
+    
     const res = await rescueApi.getAnimalList(params)
     if (res.data && res.data.records) {
       animalList.value = res.data.records.map(item => ({
@@ -223,27 +242,32 @@ const loadData = async () => {
     }
   } catch (error) {
     console.error('加载动物列表失败', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none'
+    })
   }
 }
 
 const getDefaultAnimalImage = (type) => {
-  const imageMap = {
-    'dog': 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&q=80',
-    'cat': 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80',
-    'other': 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&q=80'
+  return defaultAnimalImage(type)
+}
+
+const handleImageError = (e, id) => {
+  console.log('图片加载失败', id)
+  const item = animalList.value.find(a => a.id === id)
+  if (item) {
+    item.photo = getDefaultAnimalImage(item.animalType)
   }
-  return imageMap[type] || imageMap['other']
 }
 
 const handleSearch = () => {
-  console.log('搜索:', keyword.value)
   loadData()
 }
 
 const handleDetail = (item) => {
-  uni.showToast({
-    title: '详情页面开发中',
-    icon: 'none'
+  uni.navigateTo({
+    url: `/pages/animal/detail?id=${item.id}`
   })
 }
 
@@ -251,15 +275,22 @@ const handleLike = (item) => {
   item.isLiked = !item.isLiked
   uni.showToast({
     title: item.isLiked ? '已收藏' : '已取消收藏',
-    icon: 'success'
+    icon: 'success',
+    duration: 1500
   })
 }
 
 const handleAdopt = (item) => {
-  uni.showToast({
-    title: '领养申请功能开发中',
-    icon: 'none'
-  })
+  if (item.status === 'available') {
+    uni.navigateTo({
+      url: `/pages/adoption/apply?animalId=${item.id}`
+    })
+  } else {
+    uni.showToast({
+      title: '该动物暂不可领养',
+      icon: 'none'
+    })
+  }
 }
 
 const handleReset = () => {
@@ -286,7 +317,7 @@ const getStatusText = (status) => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: #F8F9FA;
+  background: var(--bg-page);
   padding-bottom: 20rpx;
 }
 
@@ -295,8 +326,9 @@ const getStatusText = (status) => {
   display: flex;
   gap: 16rpx;
   padding: 24rpx;
-  background: #fff;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1rpx solid var(--border-color);
 }
 
 .search-input-wrapper {
@@ -305,18 +337,20 @@ const getStatusText = (status) => {
   align-items: center;
   gap: 16rpx;
   padding: 20rpx 24rpx;
-  background: #F8F9FA;
-  border-radius: 16rpx;
+  background: var(--bg-gray);
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--border-color);
 }
 
 .search-icon {
   font-size: 32rpx;
+  flex-shrink: 0;
 }
 
 .search-input {
   flex: 1;
   font-size: 28rpx;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .filter-btn {
@@ -325,20 +359,28 @@ const getStatusText = (status) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(255, 140, 66, 0.3);
+  background: var(--primary-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+    background: var(--primary-dark);
+  }
 }
 
 .filter-icon {
   font-size: 36rpx;
+  color: #fff;
 }
 
 /* 分类滚动 */
 .category-scroll {
   white-space: nowrap;
-  background: #fff;
+  background: var(--bg-white);
   padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--border-color);
 }
 
 .category-list {
@@ -352,16 +394,23 @@ const getStatusText = (status) => {
   align-items: center;
   gap: 8rpx;
   padding: 16rpx 32rpx;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   border-radius: 40rpx;
+  border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
+  white-space: nowrap;
 
   &.active {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     
     .category-text {
-      color: #FF8C42;
+      color: #fff;
       font-weight: 600;
+    }
+    
+    .category-emoji {
+      filter: brightness(1.2);
     }
   }
 }
@@ -372,7 +421,7 @@ const getStatusText = (status) => {
 
 .category-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -385,23 +434,36 @@ const getStatusText = (status) => {
 }
 
 .animal-card {
-  background: #fff;
-  border-radius: 24rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.animal-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400rpx;
+  overflow: hidden;
 }
 
 .animal-image {
   width: 100%;
-  height: 400rpx;
-  background: linear-gradient(135deg, #F8F9FA 0%, #E8EAED 100%);
+  height: 100%;
+  background: var(--bg-gray);
 }
 
 .badge-wrapper {
   position: absolute;
-  top: 20rpx;
-  left: 20rpx;
+  top: 16rpx;
+  left: 16rpx;
   display: flex;
   flex-direction: column;
   gap: 12rpx;
@@ -413,15 +475,14 @@ const getStatusText = (status) => {
   font-size: 22rpx;
   font-weight: 500;
   backdrop-filter: blur(10rpx);
+  color: #fff;
 
   &.urgent {
-    background: rgba(255, 71, 87, 0.9);
-    color: #fff;
+    background: rgba(220, 53, 69, 0.9);
   }
 
   &.health {
-    background: rgba(52, 152, 219, 0.9);
-    color: #fff;
+    background: rgba(255, 193, 7, 0.9);
   }
 }
 
@@ -439,7 +500,8 @@ const getStatusText = (status) => {
 .animal-name {
   font-size: 36rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
+  flex: 1;
 }
 
 .gender-badge {
@@ -451,15 +513,16 @@ const getStatusText = (status) => {
   border-radius: 50%;
   font-size: 24rpx;
   font-weight: 600;
+  flex-shrink: 0;
 
   &.male {
-    background: linear-gradient(135deg, #89CFF0 0%, #4A90E2 100%);
-    color: #fff;
+    background: #E3F2FD;
+    color: #1976D2;
   }
 
   &.female {
-    background: linear-gradient(135deg, #FFB6D9 0%, #FF85B3 100%);
-    color: #fff;
+    background: #FCE4EC;
+    color: #C2185B;
   }
 }
 
@@ -468,6 +531,10 @@ const getStatusText = (status) => {
   align-items: center;
   gap: 32rpx;
   margin-bottom: 16rpx;
+  
+  &.location-row {
+    gap: 8rpx;
+  }
 }
 
 .info-item {
@@ -478,28 +545,33 @@ const getStatusText = (status) => {
 
 .info-label {
   font-size: 24rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 .info-value {
   font-size: 26rpx;
-  color: #2C3E50;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .location-icon {
   font-size: 28rpx;
+  flex-shrink: 0;
 }
 
 .location-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .info-desc {
   margin: 20rpx 0;
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -513,7 +585,7 @@ const getStatusText = (status) => {
   justify-content: space-between;
   margin-top: 20rpx;
   padding-top: 20rpx;
-  border-top: 1rpx solid #E8EAED;
+  border-top: 1rpx solid var(--divider-color);
 }
 
 .status-tag {
@@ -523,47 +595,58 @@ const getStatusText = (status) => {
   font-weight: 500;
 
   &.available {
-    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
-    color: #28A745;
+    background: #E8F5E9;
+    color: var(--success-color);
   }
 
   &.pending {
-    background: linear-gradient(135deg, #FFF3CD 0%, #FFE8A1 100%);
-    color: #FFC107;
+    background: #FFF3E0;
+    color: var(--warning-color);
   }
 
   &.adopted {
-    background: linear-gradient(135deg, #D1ECF1 0%, #BEE5EB 100%);
-    color: #17A2B8;
+    background: #E3F2FD;
+    color: var(--primary-color);
   }
 
   &.rescued {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
-    color: #FF8C42;
+    background: #FCE4EC;
+    color: var(--danger-color);
   }
 }
 
 .action-btns {
   display: flex;
   gap: 16rpx;
+  align-items: center;
 }
 
 .btn-action {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8rpx;
   padding: 12rpx 24rpx;
   border-radius: 40rpx;
   border: none;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   transition: all 0.3s ease;
+  min-width: 80rpx;
 
   &.primary {
-    background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+    background: var(--primary-color);
     color: #fff;
-    box-shadow: 0 4rpx 12rpx rgba(255, 140, 66, 0.3);
+    box-shadow: var(--shadow-sm);
+    
+    &:active {
+      background: var(--primary-dark);
+    }
+  }
+  
+  &:active {
+    background: #E0E0E0;
   }
 }
 
@@ -593,13 +676,13 @@ const getStatusText = (status) => {
 
 .empty-text {
   font-size: 28rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .empty-desc {
   font-size: 24rpx;
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 /* 筛选弹窗 */
@@ -618,7 +701,7 @@ const getStatusText = (status) => {
 .filter-content {
   width: 100%;
   max-height: 80vh;
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 40rpx 40rpx 0 0;
   padding: 40rpx 32rpx;
 }
@@ -628,18 +711,25 @@ const getStatusText = (status) => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 40rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid var(--divider-color);
 }
 
 .filter-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .filter-close {
   font-size: 40rpx;
-  color: #95A5A6;
+  color: var(--text-light);
   line-height: 1;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filter-section {
@@ -650,7 +740,7 @@ const getStatusText = (status) => {
   display: block;
   font-size: 28rpx;
   font-weight: 500;
-  color: #2C3E50;
+  color: var(--text-primary);
   margin-bottom: 20rpx;
 }
 
@@ -662,15 +752,17 @@ const getStatusText = (status) => {
 
 .filter-option {
   padding: 16rpx 32rpx;
-  background: #F8F9FA;
+  background: var(--bg-gray);
   border-radius: 40rpx;
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
+  border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
 
   &.active {
-    background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+    background: var(--primary-color);
     color: #fff;
+    border-color: var(--primary-color);
   }
 }
 
@@ -684,19 +776,28 @@ const getStatusText = (status) => {
 .btn-confirm {
   flex: 1;
   height: 88rpx;
-  border-radius: 16rpx;
+  border-radius: var(--radius-md);
   font-size: 30rpx;
   border: none;
+  font-weight: 500;
 }
 
 .btn-reset {
-  background: #F8F9FA;
-  color: #7F8C8D;
+  background: var(--bg-gray);
+  color: var(--text-secondary);
+  
+  &:active {
+    background: #E0E0E0;
+  }
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: var(--primary-color);
   color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(255, 140, 66, 0.3);
+  box-shadow: var(--shadow-sm);
+  
+  &:active {
+    background: var(--primary-dark);
+  }
 }
 </style>

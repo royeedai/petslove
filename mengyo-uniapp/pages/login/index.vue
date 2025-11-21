@@ -4,7 +4,6 @@
     <view class="bg-decoration">
       <view class="circle circle-1"></view>
       <view class="circle circle-2"></view>
-      <view class="circle circle-3"></view>
     </view>
 
     <!-- Logo 区域 -->
@@ -100,7 +99,7 @@
           <label class="agreement-label">
             <checkbox 
               :checked="agreeTerms" 
-              color="#FF8C42"
+              color="#0066CC"
               class="agreement-checkbox"
             />
             <text class="agreement-text">
@@ -111,24 +110,6 @@
             </text>
           </label>
         </checkbox-group>
-      </view>
-    </view>
-
-    <!-- 其他登录方式 -->
-    <view class="other-login">
-      <view class="divider-wrapper">
-        <view class="divider-line"></view>
-        <text class="divider-text">其他登录方式</text>
-        <view class="divider-line"></view>
-      </view>
-      
-      <view class="other-methods">
-        <view class="method-item" @click="handleAppleLogin">
-          <view class="method-icon apple">
-            <text class="icon-text"></text>
-          </view>
-          <text class="method-name">Apple</text>
-        </view>
       </view>
     </view>
   </view>
@@ -329,20 +310,13 @@ const handleProtocol = (type) => {
     url: urlMap[type]
   })
 }
-
-const handleAppleLogin = () => {
-  uni.showToast({
-    title: '暂未开放',
-    icon: 'none'
-  })
-}
 </script>
 
 <style lang="scss" scoped>
 .page {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #FFF5EE 0%, #FFEEE0 100%);
+  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECF0 100%);
   padding: 60rpx 40rpx;
   overflow: hidden;
 }
@@ -367,7 +341,7 @@ const handleAppleLogin = () => {
 .circle-1 {
   width: 400rpx;
   height: 400rpx;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  background: var(--primary-color);
   top: -100rpx;
   right: -100rpx;
 }
@@ -375,17 +349,9 @@ const handleAppleLogin = () => {
 .circle-2 {
   width: 300rpx;
   height: 300rpx;
-  background: linear-gradient(135deg, #FFB88C 0%, #FF9D5C 100%);
+  background: var(--primary-color);
   bottom: 100rpx;
   left: -80rpx;
-}
-
-.circle-3 {
-  width: 200rpx;
-  height: 200rpx;
-  background: linear-gradient(135deg, #FFDCC5 0%, #FFB88C 100%);
-  top: 50%;
-  right: 40rpx;
 }
 
 /* Logo 区域 */
@@ -404,9 +370,9 @@ const handleAppleLogin = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  border-radius: 40rpx;
-  box-shadow: 0 16rpx 48rpx rgba(255, 140, 66, 0.25);
+  background: var(--primary-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
   margin-bottom: 32rpx;
   animation: bounce 2s infinite;
 }
@@ -427,13 +393,13 @@ const handleAppleLogin = () => {
 .app-name {
   font-size: 48rpx;
   font-weight: 700;
-  color: #2C3E50;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
 }
 
 .app-slogan {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   letter-spacing: 2rpx;
 }
 
@@ -441,11 +407,11 @@ const handleAppleLogin = () => {
 .login-card {
   position: relative;
   z-index: 1;
-  background: #fff;
-  border-radius: 32rpx;
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
   padding: 48rpx 40rpx;
-  box-shadow: 0 16rpx 64rpx rgba(0, 0, 0, 0.08);
-  margin-bottom: 40rpx;
+  box-shadow: var(--shadow-lg);
+  border: 1rpx solid var(--border-color);
 }
 
 .login-tabs {
@@ -461,21 +427,21 @@ const handleAppleLogin = () => {
   align-items: center;
   gap: 12rpx;
   padding: 24rpx;
-  background: #F8F9FA;
-  border-radius: 20rpx;
-  border: 3rpx solid transparent;
+  background: var(--bg-gray);
+  border-radius: var(--radius-md);
+  border: 2rpx solid transparent;
   transition: all 0.3s ease;
 
   &.active {
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
-    border-color: #FF8C42;
+    background: #E3F2FD;
+    border-color: var(--primary-color);
 
     .tab-icon {
-      transform: scale(1.2);
+      transform: scale(1.1);
     }
 
     .tab-text {
-      color: #FF8C42;
+      color: var(--primary-color);
       font-weight: 600;
     }
   }
@@ -488,7 +454,7 @@ const handleAppleLogin = () => {
 
 .tab-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   transition: all 0.3s ease;
 }
 
@@ -508,7 +474,7 @@ const handleAppleLogin = () => {
 
 .info-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
 }
 
 .btn-wechat {
@@ -518,14 +484,15 @@ const handleAppleLogin = () => {
   align-items: center;
   justify-content: center;
   gap: 16rpx;
-  background: linear-gradient(135deg, #09BB07 0%, #07A600 100%);
-  border-radius: 20rpx;
+  background: #09BB07;
+  border-radius: var(--radius-md);
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(9, 187, 7, 0.3);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
 
   &:active {
     transform: scale(0.98);
+    background: #07A600;
   }
 }
 
@@ -550,30 +517,31 @@ const handleAppleLogin = () => {
   align-items: center;
   gap: 16rpx;
   padding: 24rpx;
-  background: #F8F9FA;
-  border-radius: 20rpx;
+  background: var(--bg-gray);
+  border-radius: var(--radius-md);
   border: 2rpx solid transparent;
   transition: all 0.3s ease;
 
   &:focus-within {
-    background: #fff;
-    border-color: #FF8C42;
-    box-shadow: 0 4rpx 20rpx rgba(255, 140, 66, 0.15);
+    background: var(--bg-white);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
   }
 }
 
 .input-icon {
   font-size: 36rpx;
+  flex-shrink: 0;
 }
 
 .form-input {
   flex: 1;
   font-size: 28rpx;
-  color: #2C3E50;
+  color: var(--text-primary);
 }
 
 .input-placeholder {
-  color: #95A5A6;
+  color: var(--text-light);
 }
 
 .code-input {
@@ -585,16 +553,16 @@ const handleAppleLogin = () => {
   right: 20rpx;
   padding: 12rpx 24rpx;
   font-size: 24rpx;
-  color: #FF8C42;
-  background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
-  border-radius: 16rpx;
+  color: var(--primary-color);
+  background: #E3F2FD;
+  border-radius: var(--radius-sm);
   border: none;
   font-weight: 500;
   transition: all 0.3s ease;
 
   &.disabled {
-    color: #95A5A6;
-    background: #E8EAED;
+    color: var(--text-light);
+    background: var(--bg-gray);
   }
 }
 
@@ -604,15 +572,16 @@ const handleAppleLogin = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  border-radius: 20rpx;
+  background: var(--primary-color);
+  border-radius: var(--radius-md);
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.3);
+  box-shadow: var(--shadow-sm);
   margin-top: 40rpx;
   transition: all 0.3s ease;
 
   &:active {
     transform: scale(0.98);
+    background: var(--primary-dark);
   }
 }
 
@@ -641,74 +610,12 @@ const handleAppleLogin = () => {
 .agreement-text {
   flex: 1;
   font-size: 22rpx;
-  color: #7F8C8D;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
 .agreement-link {
-  color: #FF8C42;
+  color: var(--primary-color);
   font-weight: 500;
-}
-
-/* 其他登录方式 */
-.other-login {
-  position: relative;
-  z-index: 1;
-}
-
-.divider-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 40rpx;
-}
-
-.divider-line {
-  flex: 1;
-  height: 2rpx;
-  background: #E8EAED;
-}
-
-.divider-text {
-  font-size: 24rpx;
-  color: #95A5A6;
-}
-
-.other-methods {
-  display: flex;
-  justify-content: center;
-  gap: 60rpx;
-}
-
-.method-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.method-icon {
-  width: 88rpx;
-  height: 88rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-  
-  &.apple {
-    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
-  }
-}
-
-.icon-text {
-  font-size: 44rpx;
-  color: #fff;
-}
-
-.method-name {
-  font-size: 24rpx;
-  color: #7F8C8D;
 }
 </style>
