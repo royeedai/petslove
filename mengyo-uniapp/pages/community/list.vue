@@ -1,22 +1,24 @@
 <template>
   <view class="page">
-    <!-- 顶部发布入口 -->
-    <view class="publish-bar" @click="handlePublish">
-      <image 
-        :src="userInfo?.avatar || defaultAvatar" 
-        mode="aspectFill" 
-        class="user-avatar"
-        @error="handleAvatarError"
-      ></image>
-      <view class="publish-input">
-        <text class="publish-placeholder">分享你的爱宠故事...</text>
-      </view>
-      <view class="publish-btn">
-        <text class="publish-icon">📝</text>
+    <!-- 顶部发布入口 - 更温馨的设计 -->
+    <view class="publish-section">
+      <view class="publish-card" @click="handlePublish">
+        <image 
+          :src="userInfo?.avatar || defaultAvatar" 
+          mode="aspectFill" 
+          class="user-avatar"
+          @error="handleAvatarError"
+        ></image>
+        <view class="publish-input">
+          <text class="publish-placeholder">分享你的爱宠故事...</text>
+        </view>
+        <view class="publish-btn">
+          <text class="publish-icon">📝</text>
+        </view>
       </view>
     </view>
 
-    <!-- 分类标签 -->
+    <!-- 分类标签 - 更圆润的设计 -->
     <scroll-view scroll-x class="category-scroll" :show-scrollbar="false">
       <view class="category-list">
         <view 
@@ -32,7 +34,7 @@
       </view>
     </scroll-view>
 
-    <!-- 社区动态列表 -->
+    <!-- 社区动态列表 - Pinterest 风格卡片 -->
     <view class="post-list">
       <view 
         v-for="item in postList" 
@@ -63,7 +65,7 @@
           <text class="content-text">{{ item.content }}</text>
         </view>
 
-        <!-- 图片列表 -->
+        <!-- 图片列表 - Pinterest 风格网格 -->
         <view v-if="item.images && item.images.length > 0" class="image-grid" :class="getImageGridClass(item.images.length)">
           <image 
             v-for="(img, imgIndex) in item.images" 
@@ -290,7 +292,6 @@ const handleShare = (item) => {
 
 const handleTag = (tag) => {
   console.log('点击标签：', tag)
-  // 可以跳转到标签页面
 }
 
 const handleDetail = (item) => {
@@ -338,50 +339,59 @@ const formatTime = (time) => {
 .page {
   min-height: 100vh;
   background: var(--bg-page);
-  padding-bottom: 20rpx;
+  padding-bottom: var(--spacing-lg);
 }
 
-/* 发布入口 */
-.publish-bar {
+/* 发布入口 - 更温馨的设计 */
+.publish-section {
+  padding: var(--spacing-lg);
+}
+
+.publish-card {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 24rpx;
-  margin: 24rpx 24rpx 16rpx;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: var(--bg-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:active {
+    transform: translateY(-2rpx);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .user-avatar {
-  width: 72rpx;
-  height: 72rpx;
+  width: 80rpx;
+  height: 80rpx;
   border-radius: 50%;
   border: 2rpx solid var(--border-color);
-  background: var(--bg-gray);
+  background: var(--bg-warm);
   flex-shrink: 0;
 }
 
 .publish-input {
   flex: 1;
-  height: 72rpx;
+  height: 80rpx;
   display: flex;
   align-items: center;
-  padding: 0 24rpx;
+  padding: 0 var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: 40rpx;
+  border-radius: var(--radius-full);
   border: 1rpx solid var(--border-color);
 }
 
 .publish-placeholder {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-light);
 }
 
 .publish-btn {
-  width: 72rpx;
-  height: 72rpx;
+  width: 80rpx;
+  height: 80rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,38 +407,39 @@ const formatTime = (time) => {
 }
 
 .publish-icon {
-  font-size: 36rpx;
+  font-size: 40rpx;
 }
 
-/* 分类滚动 */
+/* 分类滚动 - 更圆润的设计 */
 .category-scroll {
   white-space: nowrap;
   background: var(--bg-white);
-  padding: 20rpx 0;
-  margin-bottom: 16rpx;
+  padding: var(--spacing-lg) 0;
+  margin-bottom: var(--spacing-md);
   border-bottom: 1rpx solid var(--border-color);
 }
 
 .category-list {
   display: inline-flex;
-  gap: 16rpx;
-  padding: 0 24rpx;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
 }
 
 .category-item {
   display: inline-flex;
   align-items: center;
   gap: 8rpx;
-  padding: 16rpx 32rpx;
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: 40rpx;
+  border-radius: var(--radius-full);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &.active {
     background: var(--primary-color);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
     
     .category-text {
       color: #fff;
@@ -436,8 +447,12 @@ const formatTime = (time) => {
     }
     
     .category-emoji {
-      filter: brightness(1.2);
+      filter: brightness(1.1);
     }
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 
@@ -451,24 +466,24 @@ const formatTime = (time) => {
   white-space: nowrap;
 }
 
-/* 动态列表 */
+/* 动态列表 - Pinterest 风格卡片 */
 .post-list {
-  padding: 0 24rpx;
+  padding: 0 var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: var(--spacing-xl);
 }
 
 .post-card {
   background: var(--bg-white);
-  border-radius: var(--radius-lg);
-  padding: 28rpx;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
-    transform: scale(0.98);
+    transform: translateY(-2rpx);
     box-shadow: var(--shadow-md);
   }
 }
@@ -476,21 +491,21 @@ const formatTime = (time) => {
 .post-header {
   display: flex;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: var(--spacing-lg);
 }
 
 .avatar {
-  width: 80rpx;
-  height: 80rpx;
+  width: 88rpx;
+  height: 88rpx;
   border-radius: 50%;
   border: 2rpx solid var(--border-color);
-  background: var(--bg-gray);
+  background: var(--bg-warm);
   flex-shrink: 0;
 }
 
 .user-info {
   flex: 1;
-  margin-left: 20rpx;
+  margin-left: var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: 6rpx;
@@ -498,54 +513,63 @@ const formatTime = (time) => {
 }
 
 .nickname {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 500;
   color: var(--text-primary);
 }
 
 .time {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: var(--text-light);
 }
 
 .more-btn {
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx;
+  height: 64rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: var(--bg-gray);
+  }
 }
 
 .more-icon {
-  font-size: 36rpx;
+  font-size: 40rpx;
   color: var(--text-light);
   line-height: 1;
 }
 
 /* 动态内容 */
 .post-content {
-  margin-bottom: 20rpx;
+  margin-bottom: var(--spacing-lg);
 }
 
 .content-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.7;
   word-break: break-all;
+  letter-spacing: 0.01em;
 }
 
-/* 图片网格 */
+/* 图片网格 - Pinterest 风格 */
 .image-grid {
   display: grid;
-  gap: 12rpx;
-  margin-bottom: 20rpx;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 
   &.grid-1 {
     grid-template-columns: 1fr;
     
     .post-image {
-      height: 400rpx;
+      height: 500rpx;
     }
   }
 
@@ -553,7 +577,7 @@ const formatTime = (time) => {
     grid-template-columns: repeat(2, 1fr);
     
     .post-image {
-      height: 280rpx;
+      height: 320rpx;
     }
   }
 
@@ -561,7 +585,7 @@ const formatTime = (time) => {
     grid-template-columns: repeat(3, 1fr);
     
     .post-image {
-      height: 200rpx;
+      height: 240rpx;
     }
   }
 
@@ -569,50 +593,60 @@ const formatTime = (time) => {
     grid-template-columns: repeat(2, 1fr);
     
     .post-image {
-      height: 280rpx;
+      height: 320rpx;
     }
   }
 }
 
 .post-image {
   width: 100%;
-  border-radius: var(--radius-md);
-  background: var(--bg-gray);
+  background: var(--bg-warm);
+  transition: transform 0.3s ease;
+  
+  &:active {
+    transform: scale(1.05);
+  }
 }
 
 /* 标签 */
 .tags-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
-  margin-bottom: 20rpx;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
 .tag-item {
   padding: 8rpx 20rpx;
-  background: #E3F2FD;
-  border-radius: 20rpx;
-  font-size: 24rpx;
+  background: var(--primary-bg);
+  border-radius: var(--radius-full);
+  font-size: 26rpx;
   color: var(--primary-color);
-  border: 1rpx solid rgba(0, 102, 204, 0.2);
+  border: 1rpx solid rgba(255, 90, 95, 0.2);
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: var(--primary-color);
+    color: #fff;
+  }
 }
 
 /* 互动区域 */
 .post-actions {
   display: flex;
   align-items: center;
-  gap: 48rpx;
-  padding-top: 20rpx;
+  gap: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
   border-top: 1rpx solid var(--divider-color);
 }
 
 .action-item {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  padding: 8rpx 16rpx;
+  gap: 10rpx;
+  padding: var(--spacing-xs) var(--spacing-md);
   background: var(--bg-gray);
-  border-radius: 40rpx;
+  border-radius: var(--radius-full);
   transition: all 0.3s ease;
   
   &:active {
@@ -621,7 +655,7 @@ const formatTime = (time) => {
 }
 
 .action-icon {
-  font-size: 32rpx;
+  font-size: 36rpx;
   transition: all 0.3s ease;
 
   &.liked {
@@ -639,7 +673,7 @@ const formatTime = (time) => {
 }
 
 .action-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-secondary);
   
   &.active {
@@ -650,15 +684,15 @@ const formatTime = (time) => {
 
 /* 评论预览 */
 .comments-preview {
-  margin-top: 20rpx;
-  padding-top: 20rpx;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
   border-top: 1rpx solid var(--divider-color);
 }
 
 .comment-item {
-  font-size: 26rpx;
-  line-height: 1.6;
-  margin-bottom: 12rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-sm);
 }
 
 .comment-user {
@@ -671,9 +705,9 @@ const formatTime = (time) => {
 }
 
 .view-all-comments {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-light);
-  margin-top: 12rpx;
+  margin-top: var(--spacing-sm);
 }
 
 /* 空状态 */
@@ -682,23 +716,23 @@ const formatTime = (time) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 0;
-  gap: 20rpx;
+  padding: var(--spacing-xxl) 0;
+  gap: var(--spacing-md);
 }
 
 .empty-icon {
-  font-size: 120rpx;
-  opacity: 0.3;
+  font-size: 140rpx;
+  opacity: 0.25;
 }
 
 .empty-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .empty-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-light);
 }
 </style>

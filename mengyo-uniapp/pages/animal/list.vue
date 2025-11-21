@@ -1,23 +1,26 @@
 <template>
   <view class="page">
-    <!-- 搜索和筛选栏 -->
-    <view class="search-bar">
-      <view class="search-input-wrapper">
-        <text class="search-icon">🔍</text>
-        <input 
-          v-model="keyword" 
-          type="text" 
-          placeholder="搜索动物名称或品种" 
-          class="search-input"
-          @confirm="handleSearch"
-        />
-      </view>
-      <view class="filter-btn" @click="showFilter = true">
-        <text class="filter-icon">⚙️</text>
+    <!-- 搜索和筛选栏 - 更温馨的设计 -->
+    <view class="search-section">
+      <view class="search-bar">
+        <view class="search-input-wrapper">
+          <text class="search-icon">🔍</text>
+          <input 
+            v-model="keyword" 
+            type="text" 
+            placeholder="搜索动物名称或品种" 
+            class="search-input"
+            placeholder-class="input-placeholder"
+            @confirm="handleSearch"
+          />
+        </view>
+        <view class="filter-btn" @click="showFilter = true">
+          <text class="filter-icon">⚙️</text>
+        </view>
       </view>
     </view>
 
-    <!-- 分类标签 -->
+    <!-- 分类标签 - 更圆润的设计 -->
     <scroll-view scroll-x class="category-scroll" :show-scrollbar="false">
       <view class="category-list">
         <view 
@@ -33,7 +36,7 @@
       </view>
     </scroll-view>
 
-    <!-- 动物列表 -->
+    <!-- 动物列表 - Pinterest 风格卡片 -->
     <view class="animal-list">
       <view 
         v-for="item in animalList" 
@@ -52,11 +55,18 @@
           <!-- 徽章标签 -->
           <view class="badge-wrapper">
             <view v-if="item.isUrgent" class="badge urgent">
-              紧急
+              <text class="badge-icon">🚨</text>
+              <text class="badge-text">紧急</text>
             </view>
             <view v-if="item.healthStatus === 'injured'" class="badge health">
-              受伤
+              <text class="badge-icon">⚠️</text>
+              <text class="badge-text">受伤</text>
             </view>
+          </view>
+          
+          <!-- 收藏按钮 -->
+          <view class="like-btn" @click.stop="handleLike(item)">
+            <text class="like-icon">{{ item.isLiked ? '❤️' : '🤍' }}</text>
           </view>
         </view>
 
@@ -68,18 +78,18 @@
             </view>
           </view>
 
-          <view class="info-row">
-            <view class="info-item">
-              <text class="info-label">品种</text>
-              <text class="info-value">{{ item.breed || '未知' }}</text>
+          <view class="info-tags">
+            <view class="info-tag">
+              <text class="tag-label">品种</text>
+              <text class="tag-value">{{ item.breed || '未知' }}</text>
             </view>
-            <view class="info-item">
-              <text class="info-label">年龄</text>
-              <text class="info-value">{{ item.age || '未知' }}</text>
+            <view class="info-tag">
+              <text class="tag-label">年龄</text>
+              <text class="tag-value">{{ item.age || '未知' }}</text>
             </view>
           </view>
 
-          <view class="info-row location-row">
+          <view class="location-row">
             <text class="location-icon">📍</text>
             <text class="location-text">{{ item.location || '位置待确认' }}</text>
           </view>
@@ -90,16 +100,12 @@
 
           <view class="card-footer">
             <view class="status-tag" :class="item.status">
-              {{ getStatusText(item.status) }}
+              <text class="status-dot"></text>
+              <text class="status-text">{{ getStatusText(item.status) }}</text>
             </view>
-            <view class="action-btns">
-              <button class="btn-action" @click.stop="handleLike(item)">
-                <text class="btn-icon">{{ item.isLiked ? '❤️' : '🤍' }}</text>
-              </button>
-              <button class="btn-action primary" @click.stop="handleAdopt(item)">
-                <text class="btn-text">领养</text>
-              </button>
-            </view>
+            <button class="btn-adopt" @click.stop="handleAdopt(item)">
+              <text class="btn-text">领养</text>
+            </button>
           </view>
         </view>
       </view>
@@ -112,7 +118,7 @@
       </view>
     </view>
 
-    <!-- 筛选弹窗 -->
+    <!-- 筛选弹窗 - 更温馨的设计 -->
     <view v-if="showFilter" class="filter-modal" @click="showFilter = false">
       <view class="filter-content" @click.stop>
         <view class="filter-header">
@@ -318,28 +324,38 @@ const getStatusText = (status) => {
 .page {
   min-height: 100vh;
   background: var(--bg-page);
-  padding-bottom: 20rpx;
+  padding-bottom: var(--spacing-lg);
 }
 
-/* 搜索栏 */
+/* 搜索栏 - 更温馨的设计 */
+.search-section {
+  padding: var(--spacing-lg);
+  background: var(--bg-white);
+  border-bottom: 1rpx solid var(--border-color);
+}
+
 .search-bar {
   display: flex;
-  gap: 16rpx;
-  padding: 24rpx;
-  background: var(--bg-white);
-  box-shadow: var(--shadow-sm);
-  border-bottom: 1rpx solid var(--border-color);
+  gap: var(--spacing-md);
+  align-items: center;
 }
 
 .search-input-wrapper {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 20rpx 24rpx;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 1rpx solid var(--border-color);
+  transition: all 0.3s ease;
+  
+  &:focus-within {
+    background: var(--bg-white);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .search-icon {
@@ -353,6 +369,10 @@ const getStatusText = (status) => {
   color: var(--text-primary);
 }
 
+.input-placeholder {
+  color: var(--text-light);
+}
+
 .filter-btn {
   width: 88rpx;
   height: 88rpx;
@@ -360,7 +380,7 @@ const getStatusText = (status) => {
   align-items: center;
   justify-content: center;
   background: var(--primary-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
   
@@ -375,34 +395,35 @@ const getStatusText = (status) => {
   color: #fff;
 }
 
-/* 分类滚动 */
+/* 分类滚动 - 更圆润的设计 */
 .category-scroll {
   white-space: nowrap;
   background: var(--bg-white);
-  padding: 20rpx 0;
+  padding: var(--spacing-lg) 0;
   border-bottom: 1rpx solid var(--border-color);
 }
 
 .category-list {
   display: inline-flex;
-  gap: 16rpx;
-  padding: 0 24rpx;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
 }
 
 .category-item {
   display: inline-flex;
   align-items: center;
   gap: 8rpx;
-  padding: 16rpx 32rpx;
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: 40rpx;
+  border-radius: var(--radius-full);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &.active {
     background: var(--primary-color);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
     
     .category-text {
       color: #fff;
@@ -410,8 +431,12 @@ const getStatusText = (status) => {
     }
     
     .category-emoji {
-      filter: brightness(1.2);
+      filter: brightness(1.1);
     }
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 
@@ -425,24 +450,24 @@ const getStatusText = (status) => {
   white-space: nowrap;
 }
 
-/* 动物列表 */
+/* 动物列表 - Pinterest 风格卡片 */
 .animal-list {
-  padding: 24rpx;
+  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: var(--spacing-xl);
 }
 
 .animal-card {
   background: var(--bg-white);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
-    transform: scale(0.98);
+    transform: translateY(-4rpx);
     box-shadow: var(--shadow-md);
   }
 }
@@ -450,68 +475,106 @@ const getStatusText = (status) => {
 .animal-image-wrapper {
   position: relative;
   width: 100%;
-  height: 400rpx;
+  height: 480rpx;
   overflow: hidden;
 }
 
 .animal-image {
   width: 100%;
   height: 100%;
-  background: var(--bg-gray);
+  background: var(--bg-warm);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animal-card:active .animal-image {
+  transform: scale(1.05);
 }
 
 .badge-wrapper {
   position: absolute;
-  top: 16rpx;
-  left: 16rpx;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  gap: var(--spacing-sm);
 }
 
 .badge {
-  padding: 8rpx 20rpx;
-  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 16rpx;
+  border-radius: var(--radius-full);
   font-size: 22rpx;
   font-weight: 500;
   backdrop-filter: blur(10rpx);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 
   &.urgent {
-    background: rgba(220, 53, 69, 0.9);
+    background: rgba(255, 90, 95, 0.9);
   }
 
   &.health {
-    background: rgba(255, 193, 7, 0.9);
+    background: rgba(255, 193, 0, 0.9);
   }
 }
 
+.badge-icon {
+  font-size: 20rpx;
+}
+
+.like-btn {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10rpx);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.like-icon {
+  font-size: 36rpx;
+}
+
 .animal-info {
-  padding: 28rpx;
+  padding: var(--spacing-xl);
 }
 
 .info-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20rpx;
+  margin-bottom: var(--spacing-lg);
 }
 
 .animal-name {
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
+  letter-spacing: -0.01em;
 }
 
 .gender-badge {
-  width: 48rpx;
-  height: 48rpx;
+  width: 56rpx;
+  height: 56rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 24rpx;
+  font-size: 28rpx;
   font-weight: 600;
   flex-shrink: 0;
 
@@ -526,32 +589,38 @@ const getStatusText = (status) => {
   }
 }
 
-.info-row {
+.info-tags {
   display: flex;
-  align-items: center;
-  gap: 32rpx;
-  margin-bottom: 16rpx;
-  
-  &.location-row {
-    gap: 8rpx;
-  }
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 
-.info-item {
+.info-tag {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--bg-warm);
+  border-radius: var(--radius-full);
 }
 
-.info-label {
+.tag-label {
   font-size: 24rpx;
   color: var(--text-light);
 }
 
-.info-value {
+.tag-value {
   font-size: 26rpx;
   color: var(--text-primary);
   font-weight: 500;
+}
+
+.location-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
 }
 
 .location-icon {
@@ -569,10 +638,10 @@ const getStatusText = (status) => {
 }
 
 .info-desc {
-  margin: 20rpx 0;
-  font-size: 26rpx;
+  margin: var(--spacing-md) 0;
+  font-size: 28rpx;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -583,80 +652,97 @@ const getStatusText = (status) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 20rpx;
-  padding-top: 20rpx;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
   border-top: 1rpx solid var(--divider-color);
 }
 
 .status-tag {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
   padding: 8rpx 20rpx;
-  border-radius: 20rpx;
+  border-radius: var(--radius-full);
   font-size: 24rpx;
   font-weight: 500;
 
   &.available {
     background: #E8F5E9;
-    color: var(--success-color);
+    
+    .status-dot {
+      background: var(--success-color);
+    }
+    
+    .status-text {
+      color: var(--success-color);
+    }
   }
 
   &.pending {
     background: #FFF3E0;
-    color: var(--warning-color);
+    
+    .status-dot {
+      background: var(--warning-color);
+    }
+    
+    .status-text {
+      color: var(--warning-color);
+    }
   }
 
   &.adopted {
     background: #E3F2FD;
-    color: var(--primary-color);
+    
+    .status-dot {
+      background: var(--primary-color);
+    }
+    
+    .status-text {
+      color: var(--primary-color);
+    }
   }
 
   &.rescued {
     background: #FCE4EC;
-    color: var(--danger-color);
+    
+    .status-dot {
+      background: var(--danger-color);
+    }
+    
+    .status-text {
+      color: var(--danger-color);
+    }
   }
 }
 
-.action-btns {
-  display: flex;
-  gap: 16rpx;
-  align-items: center;
+.status-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
 }
 
-.btn-action {
+.btn-adopt {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 40rpx;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: var(--radius-full);
   border: none;
-  background: var(--bg-gray);
-  font-size: 26rpx;
-  color: var(--text-secondary);
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
-  min-width: 80rpx;
-
-  &.primary {
-    background: var(--primary-color);
-    color: #fff;
-    box-shadow: var(--shadow-sm);
-    
-    &:active {
-      background: var(--primary-dark);
-    }
-  }
   
   &:active {
-    background: #E0E0E0;
+    background: var(--primary-dark);
+    transform: scale(0.95);
   }
-}
-
-.btn-icon {
-  font-size: 28rpx;
 }
 
 .btn-text {
-  font-size: 26rpx;
-  font-weight: 500;
+  font-size: 28rpx;
 }
 
 /* 空状态 */
@@ -665,58 +751,59 @@ const getStatusText = (status) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 0;
-  gap: 20rpx;
+  padding: var(--spacing-xxl) 0;
+  gap: var(--spacing-md);
 }
 
 .empty-icon {
-  font-size: 120rpx;
-  opacity: 0.3;
+  font-size: 140rpx;
+  opacity: 0.25;
 }
 
 .empty-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .empty-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-light);
 }
 
-/* 筛选弹窗 */
+/* 筛选弹窗 - 更温馨的设计 */
 .filter-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: flex-end;
   z-index: 999;
+  backdrop-filter: blur(4rpx);
 }
 
 .filter-content {
   width: 100%;
   max-height: 80vh;
   background: var(--bg-white);
-  border-radius: 40rpx 40rpx 0 0;
-  padding: 40rpx 32rpx;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: var(--spacing-xl);
 }
 
 .filter-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 40rpx;
-  padding-bottom: 20rpx;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
   border-bottom: 1rpx solid var(--divider-color);
 }
 
 .filter-title {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -730,31 +817,37 @@ const getStatusText = (status) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: var(--bg-gray);
+  }
 }
 
 .filter-section {
-  margin-bottom: 40rpx;
+  margin-bottom: var(--spacing-xl);
 }
 
 .filter-label {
   display: block;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 20rpx;
+  margin-bottom: var(--spacing-lg);
 }
 
 .filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
+  gap: var(--spacing-md);
 }
 
 .filter-option {
-  padding: 16rpx 32rpx;
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: 40rpx;
-  font-size: 26rpx;
+  border-radius: var(--radius-full);
+  font-size: 28rpx;
   color: var(--text-secondary);
   border: 1rpx solid var(--border-color);
   transition: all 0.3s ease;
@@ -763,23 +856,29 @@ const getStatusText = (status) => {
     background: var(--primary-color);
     color: #fff;
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 
 .filter-actions {
   display: flex;
-  gap: 20rpx;
-  margin-top: 40rpx;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
 }
 
 .btn-reset,
 .btn-confirm {
   flex: 1;
-  height: 88rpx;
-  border-radius: var(--radius-md);
-  font-size: 30rpx;
+  height: 96rpx;
+  border-radius: var(--radius-full);
+  font-size: 32rpx;
   border: none;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .btn-reset {
@@ -798,6 +897,7 @@ const getStatusText = (status) => {
   
   &:active {
     background: var(--primary-dark);
+    transform: scale(0.98);
   }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <!-- 轮播图 -->
+    <!-- 轮播图 - 更温馨的设计 -->
     <view class="banner-wrapper">
       <swiper 
         :indicator-dots="true" 
@@ -8,8 +8,8 @@
         :interval="4000" 
         :duration="500"
         :circular="true"
-        indicator-color="rgba(255, 255, 255, 0.5)"
-        indicator-active-color="#0066CC"
+        indicator-color="rgba(255, 255, 255, 0.4)"
+        indicator-active-color="#FFFFFF"
         class="banner-swiper"
       >
         <swiper-item v-for="(item, index) in banners" :key="index">
@@ -20,37 +20,37 @@
               class="banner-image"
               @error="handleImageError($event, 'banner', index)"
             ></image>
-            <view class="banner-mask"></view>
+            <view class="banner-overlay"></view>
           </view>
         </swiper-item>
       </swiper>
     </view>
 
-    <!-- 功能入口 -->
-    <view class="features-card">
+    <!-- 功能入口 - Pinterest 风格卡片 -->
+    <view class="features-section">
       <view class="features-grid">
-        <view class="feature-item" @click="navigateTo('/pages/rescue/list')">
+        <view class="feature-card" @click="navigateTo('/pages/rescue/list')">
           <view class="feature-icon-wrapper rescue">
             <text class="feature-icon">🆘</text>
           </view>
           <text class="feature-text">救助任务</text>
         </view>
         
-        <view class="feature-item" @click="navigateTo('/pages/animal/list')">
+        <view class="feature-card" @click="navigateTo('/pages/animal/list')">
           <view class="feature-icon-wrapper animal">
             <text class="feature-icon">🐾</text>
           </view>
           <text class="feature-text">流浪动物</text>
         </view>
         
-        <view class="feature-item" @click="navigateTo('/pages/donation/index')">
+        <view class="feature-card" @click="navigateTo('/pages/donation/index')">
           <view class="feature-icon-wrapper donation">
             <text class="feature-icon">❤️</text>
           </view>
           <text class="feature-text">爱心捐赠</text>
         </view>
         
-        <view class="feature-item" @click="navigateTo('/pages/adoption/index')">
+        <view class="feature-card" @click="navigateTo('/pages/adoption/index')">
           <view class="feature-icon-wrapper adoption">
             <text class="feature-icon">🏠</text>
           </view>
@@ -59,11 +59,12 @@
       </view>
     </view>
 
-    <!-- 最新救助任务 -->
+    <!-- 最新救助任务 - Pinterest 卡片风格 -->
     <view class="section">
       <view class="section-header">
         <view class="header-left">
           <text class="section-title">最新救助</text>
+          <text class="section-subtitle">用爱守护每一个生命</text>
         </view>
         <view class="section-more" @click="navigateTo('/pages/rescue/list')">
           <text class="more-text">查看全部</text>
@@ -86,7 +87,8 @@
               @error="handleImageError($event, 'rescue', item.id)"
             ></image>
             <view v-if="item.urgencyLevel === 'urgent'" class="urgent-badge">
-              紧急
+              <text class="urgent-icon">🚨</text>
+              <text class="urgent-text">紧急</text>
             </view>
           </view>
           <view class="rescue-content">
@@ -110,11 +112,12 @@
       </view>
     </view>
 
-    <!-- 社区动态 -->
+    <!-- 社区动态 - Pinterest 风格 -->
     <view class="section">
       <view class="section-header">
         <view class="header-left">
           <text class="section-title">社区动态</text>
+          <text class="section-subtitle">分享温暖，传递爱心</text>
         </view>
         <view class="section-more" @click="navigateTo('/pages/community/list')">
           <text class="more-text">查看全部</text>
@@ -265,18 +268,20 @@ const navigateTo = (url) => {
 .page {
   min-height: 100vh;
   background: var(--bg-page);
-  padding-bottom: 20rpx;
+  padding-bottom: var(--spacing-lg);
 }
 
-/* 轮播图 */
+/* 轮播图 - 更温馨的设计 */
 .banner-wrapper {
-  margin-bottom: 24rpx;
+  margin: var(--spacing-md) var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--radius-xl);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .banner-swiper {
   width: 100%;
-  height: 360rpx;
+  height: 400rpx;
 }
 
 .banner-item {
@@ -288,44 +293,50 @@ const navigateTo = (url) => {
 .banner-image {
   width: 100%;
   height: 100%;
-  background: var(--bg-gray);
+  background: var(--bg-warm);
 }
 
-.banner-mask {
+.banner-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 120rpx;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.15) 100%);
 }
 
-/* 功能入口卡片 */
-.features-card {
-  margin: 0 24rpx 24rpx;
-  background: var(--bg-white);
-  border-radius: var(--radius-lg);
-  padding: 32rpx 24rpx;
-  box-shadow: var(--shadow-sm);
-  border: 1rpx solid var(--border-color);
+/* 功能入口 - Pinterest 风格卡片 */
+.features-section {
+  margin: 0 var(--spacing-lg) var(--spacing-xl);
 }
 
 .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24rpx;
+  gap: var(--spacing-md);
 }
 
-.feature-item {
+.feature-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-sm);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1rpx solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:active {
+    transform: translateY(-4rpx);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .feature-icon-wrapper {
-  width: 96rpx;
-  height: 96rpx;
+  width: 100rpx;
+  height: 100rpx;
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
@@ -334,76 +345,89 @@ const navigateTo = (url) => {
   transition: all 0.3s ease;
   
   &.rescue {
-    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%);
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
   }
   
   &.animal {
-    background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+    background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
   }
   
   &.donation {
-    background: linear-gradient(135deg, #FFB84D 0%, #FF9500 100%);
+    background: linear-gradient(135deg, #FFB84D 0%, #FFC970 100%);
   }
   
   &.adoption {
-    background: linear-gradient(135deg, #28A745 0%, #1E7E34 100%);
-  }
-  
-  &:active {
-    transform: scale(0.95);
+    background: linear-gradient(135deg, #00A699 0%, #00C4B3 100%);
   }
 }
 
 .feature-icon {
-  font-size: 48rpx;
+  font-size: 52rpx;
 }
 
 .feature-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-primary);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-/* 通用区块样式 */
+/* 通用区块样式 - 增加留白 */
 .section {
-  margin: 0 24rpx 24rpx;
+  margin: 0 var(--spacing-lg) var(--spacing-xl);
   background: var(--bg-white);
-  border-radius: var(--radius-lg);
-  padding: 32rpx;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24rpx;
-  padding-bottom: 20rpx;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
   border-bottom: 1rpx solid var(--divider-color);
 }
 
 .header-left {
   display: flex;
-  align-items: center;
-  gap: 12rpx;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
 }
 
 .section-title {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  margin-top: 4rpx;
 }
 
 .section-more {
   display: flex;
   align-items: center;
   gap: 4rpx;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: var(--bg-gray);
+  }
 }
 
 .more-text {
   font-size: 26rpx;
   color: var(--primary-color);
+  font-weight: 500;
 }
 
 .more-arrow {
@@ -412,66 +436,79 @@ const navigateTo = (url) => {
   font-weight: 300;
 }
 
-/* 救助列表 */
+/* 救助列表 - Pinterest 卡片风格 */
 .rescue-list {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: var(--spacing-lg);
 }
 
 .rescue-card {
-  display: flex;
-  gap: 20rpx;
-  padding: 20rpx;
-  background: var(--bg-gray);
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
-    background: #F0F0F0;
-    transform: scale(0.98);
+    transform: translateY(-4rpx);
+    box-shadow: var(--shadow-md);
   }
 }
 
 .rescue-image-wrapper {
   position: relative;
-  flex-shrink: 0;
+  width: 100%;
+  height: 360rpx;
+  overflow: hidden;
 }
 
 .rescue-image {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: var(--radius-md);
-  background: var(--bg-gray);
+  width: 100%;
+  height: 100%;
+  background: var(--bg-warm);
+  transition: transform 0.3s ease;
+}
+
+.rescue-card:active .rescue-image {
+  transform: scale(1.05);
 }
 
 .urgent-badge {
   position: absolute;
-  top: 8rpx;
-  right: 8rpx;
-  padding: 6rpx 16rpx;
-  background: var(--danger-color);
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 20rpx;
+  background: rgba(255, 90, 95, 0.95);
+  backdrop-filter: blur(10rpx);
   color: #fff;
-  border-radius: 20rpx;
-  font-size: 20rpx;
+  border-radius: var(--radius-full);
+  font-size: 22rpx;
   font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.urgent-icon {
+  font-size: 24rpx;
 }
 
 .rescue-content {
-  flex: 1;
+  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-width: 0;
+  gap: var(--spacing-sm);
 }
 
 .rescue-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.4;
-  margin-bottom: 12rpx;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -481,24 +518,24 @@ const navigateTo = (url) => {
 .rescue-meta {
   display: flex;
   align-items: center;
-  margin-bottom: 12rpx;
+  margin-top: var(--spacing-xs);
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6rpx;
+  gap: 8rpx;
   flex: 1;
   min-width: 0;
 }
 
 .meta-icon {
-  font-size: 24rpx;
+  font-size: 26rpx;
   flex-shrink: 0;
 }
 
 .meta-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -506,85 +543,87 @@ const navigateTo = (url) => {
 }
 
 .rescue-desc {
-  font-size: 24rpx;
-  color: var(--text-light);
-  line-height: 1.5;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: var(--spacing-sm);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* 社区动态 */
+/* 社区动态 - Pinterest 风格 */
 .post-list {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: var(--spacing-lg);
 }
 
 .post-card {
-  padding: 24rpx;
-  background: var(--bg-gray);
-  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
-    background: #F0F0F0;
-    transform: scale(0.98);
+    transform: translateY(-2rpx);
+    box-shadow: var(--shadow-md);
   }
 }
 
 .post-header {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .user-avatar {
-  width: 72rpx;
-  height: 72rpx;
+  width: 80rpx;
+  height: 80rpx;
   border-radius: 50%;
   border: 2rpx solid var(--border-color);
-  background: var(--bg-gray);
+  background: var(--bg-warm);
   flex-shrink: 0;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
-  gap: 4rpx;
+  gap: 6rpx;
   flex: 1;
   min-width: 0;
 }
 
 .user-nickname {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 500;
   color: var(--text-primary);
 }
 
 .post-time {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: var(--text-light);
 }
 
 .post-content {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: var(--text-primary);
-  line-height: 1.6;
-  margin-bottom: 16rpx;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-lg);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: 0.01em;
 }
 
 .post-actions {
   display: flex;
-  gap: 32rpx;
-  padding-top: 16rpx;
+  gap: var(--spacing-xl);
+  padding-top: var(--spacing-md);
   border-top: 1rpx solid var(--divider-color);
 }
 
@@ -592,14 +631,21 @@ const navigateTo = (url) => {
   display: flex;
   align-items: center;
   gap: 8rpx;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: var(--bg-gray);
+  }
 }
 
 .action-icon {
-  font-size: 28rpx;
+  font-size: 32rpx;
 }
 
 .action-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-secondary);
 }
 
@@ -609,17 +655,17 @@ const navigateTo = (url) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80rpx 0;
-  gap: 16rpx;
+  padding: var(--spacing-xxl) 0;
+  gap: var(--spacing-md);
 }
 
 .empty-icon {
-  font-size: 80rpx;
-  opacity: 0.3;
+  font-size: 100rpx;
+  opacity: 0.25;
 }
 
 .empty-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-light);
 }
 </style>

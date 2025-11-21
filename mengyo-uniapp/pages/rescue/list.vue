@@ -1,33 +1,41 @@
 <template>
   <view class="page">
-    <!-- 顶部统计栏 -->
-    <view class="stats-bar">
-      <view class="stat-item">
-        <text class="stat-icon">🆘</text>
-        <view class="stat-info">
-          <text class="stat-value">{{ totalRescue }}</text>
-          <text class="stat-label">救助中</text>
+    <!-- 顶部统计栏 - 更温馨的设计 -->
+    <view class="stats-section">
+      <view class="stats-card">
+        <view class="stat-item">
+          <view class="stat-icon-wrapper rescue">
+            <text class="stat-icon">🆘</text>
+          </view>
+          <view class="stat-info">
+            <text class="stat-value">{{ totalRescue }}</text>
+            <text class="stat-label">救助中</text>
+          </view>
         </view>
-      </view>
-      <view class="stat-divider"></view>
-      <view class="stat-item">
-        <text class="stat-icon">✅</text>
-        <view class="stat-info">
-          <text class="stat-value">{{ completedRescue }}</text>
-          <text class="stat-label">已完成</text>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <view class="stat-icon-wrapper completed">
+            <text class="stat-icon">✅</text>
+          </view>
+          <view class="stat-info">
+            <text class="stat-value">{{ completedRescue }}</text>
+            <text class="stat-label">已完成</text>
+          </view>
         </view>
-      </view>
-      <view class="stat-divider"></view>
-      <view class="stat-item">
-        <text class="stat-icon">👥</text>
-        <view class="stat-info">
-          <text class="stat-value">{{ totalVolunteer }}</text>
-          <text class="stat-label">志愿者</text>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <view class="stat-icon-wrapper volunteer">
+            <text class="stat-icon">👥</text>
+          </view>
+          <view class="stat-info">
+            <text class="stat-value">{{ totalVolunteer }}</text>
+            <text class="stat-label">志愿者</text>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 状态筛选 -->
+    <!-- 状态筛选 - 更圆润的设计 -->
     <scroll-view scroll-x class="status-scroll" :show-scrollbar="false">
       <view class="status-list">
         <view 
@@ -43,7 +51,7 @@
       </view>
     </scroll-view>
 
-    <!-- 救助任务列表 -->
+    <!-- 救助任务列表 - Pinterest 风格卡片 -->
     <view class="rescue-list">
       <view 
         v-for="item in rescueList" 
@@ -70,11 +78,9 @@
           <text class="rescue-title">{{ item.title }}</text>
           
           <view class="rescue-meta">
-            <view class="meta-row">
-              <view class="meta-item">
-                <text class="meta-icon">📍</text>
-                <text class="meta-text">{{ item.address || '位置待确认' }}</text>
-              </view>
+            <view class="meta-item">
+              <text class="meta-icon">📍</text>
+              <text class="meta-text">{{ item.address || '位置待确认' }}</text>
             </view>
             
             <view class="meta-row">
@@ -127,7 +133,7 @@
       </view>
     </view>
 
-    <!-- 发布救助按钮 -->
+    <!-- 发布救助按钮 - 更温馨的设计 -->
     <view class="fab-btn" @click="handlePublish">
       <text class="fab-icon">+</text>
     </view>
@@ -223,7 +229,7 @@ const handleParticipate = async (item) => {
   uni.showModal({
     title: '确认参与',
     content: '确定要参与这个救助任务吗？',
-    confirmColor: '#0066CC',
+    confirmColor: '#FF5A5F',
     success: async (res) => {
       if (res.confirm) {
         try {
@@ -295,46 +301,74 @@ const formatTime = (time) => {
 .page {
   min-height: 100vh;
   background: var(--bg-page);
-  padding-bottom: 120rpx;
+  padding-bottom: 160rpx;
 }
 
-/* 统计栏 */
-.stats-bar {
+/* 统计栏 - 更温馨的设计 */
+.stats-section {
+  padding: var(--spacing-lg);
+}
+
+.stats-card {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 32rpx 24rpx;
-  margin: 24rpx;
+  padding: var(--spacing-xl);
   background: var(--bg-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 16rpx;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.stat-icon-wrapper {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  
+  &.rescue {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+  }
+  
+  &.completed {
+    background: linear-gradient(135deg, #00A699 0%, #00C4B3 100%);
+  }
+  
+  &.volunteer {
+    background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
+  }
 }
 
 .stat-icon {
-  font-size: 48rpx;
+  font-size: 44rpx;
 }
 
 .stat-info {
   display: flex;
   flex-direction: column;
   gap: 4rpx;
+  flex: 1;
 }
 
 .stat-value {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .stat-label {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: var(--text-light);
 }
 
@@ -344,35 +378,36 @@ const formatTime = (time) => {
   background: var(--divider-color);
 }
 
-/* 状态筛选 */
+/* 状态筛选 - 更圆润的设计 */
 .status-scroll {
   white-space: nowrap;
   background: var(--bg-white);
-  padding: 20rpx 0;
-  margin-bottom: 16rpx;
+  padding: var(--spacing-lg) 0;
+  margin-bottom: var(--spacing-md);
   border-bottom: 1rpx solid var(--border-color);
 }
 
 .status-list {
   display: inline-flex;
-  gap: 16rpx;
-  padding: 0 24rpx;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
 }
 
 .status-item {
   display: inline-flex;
   align-items: center;
   gap: 8rpx;
-  padding: 16rpx 32rpx;
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: 40rpx;
+  border-radius: var(--radius-full);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &.active {
     background: var(--primary-color);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
     
     .status-text {
       color: #fff;
@@ -380,8 +415,12 @@ const formatTime = (time) => {
     }
     
     .status-emoji {
-      filter: brightness(1.2);
+      filter: brightness(1.1);
     }
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 
@@ -395,41 +434,42 @@ const formatTime = (time) => {
   white-space: nowrap;
 }
 
-/* 救助任务列表 */
+/* 救助任务列表 - Pinterest 风格卡片 */
 .rescue-list {
-  padding: 0 24rpx;
+  padding: 0 var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: var(--spacing-xl);
 }
 
 .rescue-card {
   position: relative;
   background: var(--bg-white);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   border: 1rpx solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
-    transform: scale(0.98);
+    transform: translateY(-4rpx);
     box-shadow: var(--shadow-md);
   }
 }
 
 .urgent-tag {
   position: absolute;
-  top: 20rpx;
-  right: 20rpx;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
   display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: 12rpx 24rpx;
-  background: rgba(220, 53, 69, 0.95);
-  border-radius: 40rpx;
-  z-index: 10;
+  padding: 10rpx 24rpx;
+  background: rgba(255, 90, 95, 0.95);
   backdrop-filter: blur(10rpx);
+  border-radius: var(--radius-full);
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
   animation: pulse 2s infinite;
 }
 
@@ -454,26 +494,32 @@ const formatTime = (time) => {
 
 .rescue-image-wrapper {
   width: 100%;
-  height: 360rpx;
+  height: 400rpx;
   overflow: hidden;
 }
 
 .rescue-image {
   width: 100%;
   height: 100%;
-  background: var(--bg-gray);
+  background: var(--bg-warm);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rescue-card:active .rescue-image {
+  transform: scale(1.05);
 }
 
 .rescue-content {
-  padding: 28rpx;
+  padding: var(--spacing-xl);
 }
 
 .rescue-title {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.4;
-  margin-bottom: 20rpx;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-lg);
+  letter-spacing: -0.01em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -483,14 +529,14 @@ const formatTime = (time) => {
 .rescue-meta {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
-  margin-bottom: 16rpx;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
 .meta-row {
   display: flex;
   align-items: center;
-  gap: 24rpx;
+  gap: var(--spacing-lg);
 }
 
 .meta-item {
@@ -507,7 +553,7 @@ const formatTime = (time) => {
 }
 
 .meta-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -515,10 +561,10 @@ const formatTime = (time) => {
 }
 
 .rescue-desc {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 20rpx;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-lg);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -529,7 +575,7 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 20rpx;
+  padding-top: var(--spacing-lg);
   border-top: 1rpx solid var(--divider-color);
 }
 
@@ -538,7 +584,7 @@ const formatTime = (time) => {
   align-items: center;
   gap: 8rpx;
   padding: 8rpx 20rpx;
-  border-radius: 20rpx;
+  border-radius: var(--radius-full);
   font-size: 24rpx;
   font-weight: 500;
 
@@ -587,7 +633,7 @@ const formatTime = (time) => {
 
 .action-group {
   display: flex;
-  gap: 16rpx;
+  gap: var(--spacing-md);
 }
 
 .btn-participate,
@@ -595,10 +641,10 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12rpx 28rpx;
-  border-radius: 40rpx;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-full);
   border: none;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -610,6 +656,7 @@ const formatTime = (time) => {
   
   &:active {
     background: var(--primary-dark);
+    transform: scale(0.95);
   }
 }
 
@@ -623,7 +670,7 @@ const formatTime = (time) => {
 }
 
 .btn-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
 }
 
 /* 空状态 */
@@ -632,33 +679,33 @@ const formatTime = (time) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 0;
-  gap: 20rpx;
+  padding: var(--spacing-xxl) 0;
+  gap: var(--spacing-md);
 }
 
 .empty-icon {
-  font-size: 120rpx;
-  opacity: 0.3;
+  font-size: 140rpx;
+  opacity: 0.25;
 }
 
 .empty-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .empty-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--text-light);
 }
 
-/* 发布按钮 */
+/* 发布按钮 - 更温馨的设计 */
 .fab-btn {
   position: fixed;
-  right: 40rpx;
-  bottom: 140rpx;
-  width: 112rpx;
-  height: 112rpx;
+  right: var(--spacing-xl);
+  bottom: 160rpx;
+  width: 120rpx;
+  height: 120rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -666,7 +713,7 @@ const formatTime = (time) => {
   border-radius: 50%;
   box-shadow: var(--shadow-lg);
   z-index: 100;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
     transform: scale(0.95);
@@ -675,8 +722,9 @@ const formatTime = (time) => {
 }
 
 .fab-icon {
-  font-size: 52rpx;
+  font-size: 56rpx;
   color: #fff;
   font-weight: 300;
+  line-height: 1;
 }
 </style>

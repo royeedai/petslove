@@ -1,9 +1,10 @@
 <template>
   <view class="page">
-    <!-- 装饰背景 -->
+    <!-- 装饰背景 - 更温馨的设计 -->
     <view class="bg-decoration">
       <view class="circle circle-1"></view>
       <view class="circle circle-2"></view>
+      <view class="circle circle-3"></view>
     </view>
 
     <!-- Logo 区域 -->
@@ -15,7 +16,7 @@
       <text class="app-slogan">用爱守护每一个生命</text>
     </view>
 
-    <!-- 登录表单卡片 -->
+    <!-- 登录表单卡片 - 温馨暖色调 -->
     <view class="login-card">
       <!-- 登录方式切换 -->
       <view class="login-tabs">
@@ -99,7 +100,7 @@
           <label class="agreement-label">
             <checkbox 
               :checked="agreeTerms" 
-              color="#0066CC"
+              color="#FF5A5F"
               class="agreement-checkbox"
             />
             <text class="agreement-text">
@@ -316,12 +317,12 @@ const handleProtocol = (type) => {
 .page {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECF0 100%);
-  padding: 60rpx 40rpx;
+  background: linear-gradient(180deg, #FFFBF8 0%, #FEFEFE 100%);
+  padding: var(--spacing-xxl) var(--spacing-xl);
   overflow: hidden;
 }
 
-/* 装饰背景 */
+/* 装饰背景 - 更温馨的设计 */
 .bg-decoration {
   position: absolute;
   top: 0;
@@ -335,23 +336,32 @@ const handleProtocol = (type) => {
 .circle {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.1;
+  opacity: 0.08;
 }
 
 .circle-1 {
-  width: 400rpx;
-  height: 400rpx;
+  width: 500rpx;
+  height: 500rpx;
   background: var(--primary-color);
-  top: -100rpx;
-  right: -100rpx;
+  top: -150rpx;
+  right: -150rpx;
 }
 
 .circle-2 {
+  width: 400rpx;
+  height: 400rpx;
+  background: var(--primary-color);
+  bottom: 150rpx;
+  left: -100rpx;
+}
+
+.circle-3 {
   width: 300rpx;
   height: 300rpx;
   background: var(--primary-color);
-  bottom: 100rpx;
-  left: -80rpx;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Logo 区域 */
@@ -361,19 +371,19 @@ const handleProtocol = (type) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 80rpx;
+  margin-bottom: var(--spacing-xxl);
 }
 
 .logo-wrapper {
-  width: 160rpx;
-  height: 160rpx;
+  width: 180rpx;
+  height: 180rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  margin-bottom: 32rpx;
+  margin-bottom: var(--spacing-lg);
   animation: bounce 2s infinite;
 }
 
@@ -382,42 +392,43 @@ const handleProtocol = (type) => {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10rpx);
+    transform: translateY(-12rpx);
   }
 }
 
 .logo-emoji {
-  font-size: 88rpx;
+  font-size: 100rpx;
 }
 
 .app-name {
-  font-size: 48rpx;
+  font-size: 52rpx;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 16rpx;
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.02em;
 }
 
 .app-slogan {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-secondary);
   letter-spacing: 2rpx;
 }
 
-/* 登录卡片 */
+/* 登录卡片 - 温馨暖色调 */
 .login-card {
   position: relative;
   z-index: 1;
   background: var(--bg-white);
   border-radius: var(--radius-xl);
-  padding: 48rpx 40rpx;
+  padding: var(--spacing-xxl) var(--spacing-xl);
   box-shadow: var(--shadow-lg);
   border: 1rpx solid var(--border-color);
 }
 
 .login-tabs {
   display: flex;
-  gap: 20rpx;
-  margin-bottom: 48rpx;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xxl);
 }
 
 .tab-item {
@@ -425,16 +436,17 @@ const handleProtocol = (type) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
-  padding: 24rpx;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 2rpx solid transparent;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.active {
-    background: #E3F2FD;
+    background: var(--primary-bg);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
 
     .tab-icon {
       transform: scale(1.1);
@@ -445,15 +457,19 @@ const handleProtocol = (type) => {
       font-weight: 600;
     }
   }
+  
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 .tab-icon {
-  font-size: 40rpx;
+  font-size: 44rpx;
   transition: all 0.3s ease;
 }
 
 .tab-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-secondary);
   transition: all 0.3s ease;
 }
@@ -463,32 +479,32 @@ const handleProtocol = (type) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12rpx;
-  padding: 32rpx;
-  margin-bottom: 32rpx;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
 }
 
 .info-icon {
-  font-size: 36rpx;
+  font-size: 40rpx;
 }
 
 .info-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-secondary);
 }
 
 .btn-wechat {
   width: 100%;
-  height: 96rpx;
+  height: 100rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16rpx;
+  gap: var(--spacing-md);
   background: #09BB07;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: none;
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:active {
     transform: scale(0.98);
@@ -497,30 +513,30 @@ const handleProtocol = (type) => {
 }
 
 .btn-wechat .btn-icon {
-  font-size: 44rpx;
+  font-size: 48rpx;
 }
 
 .btn-wechat .btn-text {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 500;
   color: #fff;
 }
 
 /* 手机登录 */
 .form-group {
-  margin-bottom: 32rpx;
+  margin-bottom: var(--spacing-xl);
 }
 
 .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 24rpx;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: var(--bg-gray);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 2rpx solid transparent;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:focus-within {
     background: var(--bg-white);
@@ -530,13 +546,13 @@ const handleProtocol = (type) => {
 }
 
 .input-icon {
-  font-size: 36rpx;
+  font-size: 40rpx;
   flex-shrink: 0;
 }
 
 .form-input {
   flex: 1;
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: var(--text-primary);
 }
 
@@ -545,17 +561,17 @@ const handleProtocol = (type) => {
 }
 
 .code-input {
-  padding-right: 180rpx;
+  padding-right: 200rpx;
 }
 
 .btn-code {
   position: absolute;
-  right: 20rpx;
-  padding: 12rpx 24rpx;
-  font-size: 24rpx;
+  right: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: 26rpx;
   color: var(--primary-color);
-  background: #E3F2FD;
-  border-radius: var(--radius-sm);
+  background: var(--primary-bg);
+  border-radius: var(--radius-full);
   border: none;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -564,20 +580,24 @@ const handleProtocol = (type) => {
     color: var(--text-light);
     background: var(--bg-gray);
   }
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .btn-login {
   width: 100%;
-  height: 96rpx;
+  height: 100rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--primary-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: none;
   box-shadow: var(--shadow-sm);
-  margin-top: 40rpx;
-  transition: all 0.3s ease;
+  margin-top: var(--spacing-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:active {
     transform: scale(0.98);
@@ -586,32 +606,32 @@ const handleProtocol = (type) => {
 }
 
 .btn-login .btn-text {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 500;
   color: #fff;
 }
 
 /* 协议 */
 .agreement {
-  margin-top: 32rpx;
+  margin-top: var(--spacing-xl);
 }
 
 .agreement-label {
   display: flex;
   align-items: flex-start;
-  gap: 12rpx;
+  gap: var(--spacing-sm);
 }
 
 .agreement-checkbox {
-  margin-top: 4rpx;
+  margin-top: 6rpx;
   transform: scale(0.9);
 }
 
 .agreement-text {
   flex: 1;
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .agreement-link {
