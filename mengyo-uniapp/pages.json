@@ -19,6 +19,12 @@
       }
     },
     {
+      "path": "pages/animal/detail",
+      "style": {
+        "navigationBarTitleText": "宠物详情"
+      }
+    },
+    {
       "path": "pages/community/list",
       "style": {
         "navigationBarTitleText": "社区"
