@@ -130,7 +130,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { rescueApi } from '@/utils/api'
 
 const totalRescue = ref(0)
 const completedRescue = ref(0)
@@ -152,47 +153,88 @@ onMounted(() => {
   loadStats()
 })
 
-const loadData = () => {
-  // TODO: 加载救助任务列表
-  console.log('加载救助任务列表')
+watch(currentStatus, () => {
+  loadData()
+})
+
+const loadData = async () => {
+  try {
+    const params = {
+      page: 1,
+      size: 20
+    }
+    
+    if (currentStatus.value !== 'all') {
+      params.status = currentStatus.value
+    }
+    
+    const res = await rescueApi.getTaskList(params)
+    if (res.data && res.data.records) {
+      rescueList.value = res.data.records.map(item => ({
+        ...item,
+        cover: item.cover || 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80'
+      }))
+    }
+  } catch (error) {
+    console.error('加载救助任务列表失败', error)
+  }
 }
 
-const loadStats = () => {
-  // TODO: 加载统计数据
-  console.log('加载统计数据')
+const loadStats = async () => {
+  try {
+    // 加载统计数据（这里使用列表数据统计）
+    const res = await rescueApi.getTaskList({ page: 1, size: 100 })
+    if (res.data && res.data.records) {
+      const records = res.data.records
+      totalRescue.value = records.filter(r => r.status === 'pending' || r.status === 'processing').length
+      completedRescue.value = records.filter(r => r.status === 'completed').length
+      // 志愿者数量需要从后端获取，这里暂时设置为固定值
+      totalVolunteer.value = 128
+    }
+  } catch (error) {
+    console.error('加载统计数据失败', error)
+  }
 }
 
 const handleDetail = (item) => {
-  uni.navigateTo({
-    url: `/pages/rescue/detail?id=${item.id}`
+  uni.showToast({
+    title: '详情页面开发中',
+    icon: 'none'
   })
 }
 
-const handleParticipate = (item) => {
+const handleParticipate = async (item) => {
   uni.showModal({
     title: '确认参与',
     content: '确定要参与这个救助任务吗？',
-    success: (res) => {
+    success: async (res) => {
       if (res.confirm) {
-        // TODO: 调用参与救助接口
-        uni.showToast({
-          title: '参与成功',
-          icon: 'success'
-        })
+        try {
+          await rescueApi.acceptTask(item.id)
+          uni.showToast({
+            title: '参与成功',
+            icon: 'success'
+          })
+          loadData()
+        } catch (error) {
+          console.error('参与救助失败', error)
+        }
       }
     }
   })
 }
 
 const handleProgress = (item) => {
-  uni.navigateTo({
-    url: `/pages/rescue/progress?id=${item.id}`
+  uni.showToast({
+    title: '进度页面开发中',
+    icon: 'none'
   })
 }
 
 const handlePublish = () => {
-  uni.navigateTo({
-    url: '/pages/rescue/publish'
+  uni.showToast({
+    title: '发布页面开发中',
+    icon: 'none'
   })
 }
 
@@ -207,8 +249,23 @@ const getStatusText = (status) => {
 }
 
 const formatTime = (time) => {
-  // TODO: 格式化时间
-  return '刚刚'
+  if (!time) return '刚刚'
+  
+  const now = new Date()
+  const createTime = new Date(time)
+  const diff = now - createTime
+  
+  const minutes = Math.floor(diff / 1000 / 60)
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}小时前`
+  
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}天前`
+  
+  return createTime.toLocaleDateString()
 }
 </script>
 

@@ -154,7 +154,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { rescueApi } from '@/utils/api'
 
 const keyword = ref('')
 const currentCategory = ref('all')
@@ -189,9 +190,49 @@ onMounted(() => {
   loadData()
 })
 
-const loadData = () => {
-  // TODO: 加载动物列表数据
-  console.log('加载动物列表')
+watch(currentCategory, () => {
+  loadData()
+})
+
+const loadData = async () => {
+  try {
+    const params = {
+      page: 1,
+      size: 20
+    }
+    
+    if (currentCategory.value !== 'all') {
+      params.animalType = currentCategory.value
+    }
+    
+    if (filterType.value !== 'all') {
+      params.animalType = filterType.value
+    }
+    
+    if (filterHealth.value !== 'all') {
+      params.healthStatus = filterHealth.value
+    }
+    
+    const res = await rescueApi.getAnimalList(params)
+    if (res.data && res.data.records) {
+      animalList.value = res.data.records.map(item => ({
+        ...item,
+        photo: item.photo || getDefaultAnimalImage(item.animalType),
+        isLiked: false
+      }))
+    }
+  } catch (error) {
+    console.error('加载动物列表失败', error)
+  }
+}
+
+const getDefaultAnimalImage = (type) => {
+  const imageMap = {
+    'dog': 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&q=80',
+    'cat': 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80',
+    'other': 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&q=80'
+  }
+  return imageMap[type] || imageMap['other']
 }
 
 const handleSearch = () => {
@@ -200,8 +241,9 @@ const handleSearch = () => {
 }
 
 const handleDetail = (item) => {
-  uni.navigateTo({
-    url: `/pages/animal/detail?id=${item.id}`
+  uni.showToast({
+    title: '详情页面开发中',
+    icon: 'none'
   })
 }
 
@@ -214,8 +256,9 @@ const handleLike = (item) => {
 }
 
 const handleAdopt = (item) => {
-  uni.navigateTo({
-    url: `/pages/adoption/apply?animalId=${item.id}`
+  uni.showToast({
+    title: '领养申请功能开发中',
+    icon: 'none'
   })
 }
 

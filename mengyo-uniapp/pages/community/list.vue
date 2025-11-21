@@ -3,7 +3,7 @@
     <!-- 顶部发布入口 -->
     <view class="publish-bar" @click="handlePublish">
       <image 
-        :src="userInfo?.avatar || '/static/default-avatar.png'" 
+        :src="userInfo?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
         mode="aspectFill" 
         class="user-avatar"
       ></image>
@@ -135,7 +135,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { communityApi } from '@/utils/api'
 
 const userInfo = ref(null)
 const currentCategory = ref('all')
@@ -155,6 +156,10 @@ onMounted(() => {
   loadData()
 })
 
+watch(currentCategory, () => {
+  loadData()
+})
+
 const loadUserInfo = () => {
   const info = uni.getStorageSync('userInfo')
   if (info) {
@@ -162,9 +167,28 @@ const loadUserInfo = () => {
   }
 }
 
-const loadData = () => {
-  // TODO: 加载社区动态列表
-  console.log('加载社区动态列表')
+const loadData = async () => {
+  try {
+    const params = {
+      page: 1,
+      size: 20
+    }
+    
+    if (currentCategory.value !== 'all') {
+      params.category = currentCategory.value
+    }
+    
+    const res = await communityApi.getPostList(params)
+    if (res.data && res.data.records) {
+      postList.value = res.data.records.map(item => ({
+        ...item,
+        userAvatar: item.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userId}`,
+        isLiked: false
+      }))
+    }
+  } catch (error) {
+    console.error('加载社区动态失败', error)
+  }
 }
 
 const handlePublish = () => {
@@ -174,14 +198,16 @@ const handlePublish = () => {
     })
     return
   }
-  uni.navigateTo({
-    url: '/pages/community/publish'
+  uni.showToast({
+    title: '发布页面开发中',
+    icon: 'none'
   })
 }
 
 const handleUserProfile = (userId) => {
-  uni.navigateTo({
-    url: `/pages/user/profile?id=${userId}`
+  uni.showToast({
+    title: '用户主页开发中',
+    icon: 'none'
   })
 }
 
@@ -194,7 +220,7 @@ const handleMore = (item) => {
   })
 }
 
-const handleLike = (item) => {
+const handleLike = async (item) => {
   if (!userInfo.value) {
     uni.navigateTo({
       url: '/pages/login/index'
@@ -202,11 +228,16 @@ const handleLike = (item) => {
     return
   }
   
-  item.isLiked = !item.isLiked
-  if (item.isLiked) {
-    item.likeCount = (item.likeCount || 0) + 1
-  } else {
-    item.likeCount = Math.max(0, (item.likeCount || 0) - 1)
+  try {
+    const res = await communityApi.toggleLike('post', item.id)
+    item.isLiked = res.data.liked
+    if (item.isLiked) {
+      item.likeCount = (item.likeCount || 0) + 1
+    } else {
+      item.likeCount = Math.max(0, (item.likeCount || 0) - 1)
+    }
+  } catch (error) {
+    console.error('点赞失败', error)
   }
 }
 
@@ -218,8 +249,9 @@ const handleComment = (item) => {
     return
   }
   
-  uni.navigateTo({
-    url: `/pages/community/detail?id=${item.id}`
+  uni.showToast({
+    title: '评论功能开发中',
+    icon: 'none'
   })
 }
 
@@ -248,8 +280,23 @@ const getImageGridClass = (count) => {
 }
 
 const formatTime = (time) => {
-  // TODO: 格式化时间
-  return '刚刚'
+  if (!time) return '刚刚'
+  
+  const now = new Date()
+  const createTime = new Date(time)
+  const diff = now - createTime
+  
+  const minutes = Math.floor(diff / 1000 / 60)
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}小时前`
+  
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}天前`
+  
+  return createTime.toLocaleDateString()
 }
 </script>
 
