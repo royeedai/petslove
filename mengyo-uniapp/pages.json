@@ -38,9 +38,9 @@
     }
   ],
   "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#3cc51f",
-    "borderStyle": "black",
+    "color": "#95A5A6",
+    "selectedColor": "#FF8C42",
+    "borderStyle": "white",
     "backgroundColor": "#ffffff",
     "list": [
       {
@@ -76,9 +76,9 @@
     ]
   },
   "globalStyle": {
-    "navigationBarTextStyle": "black",
+    "navigationBarTextStyle": "white",
     "navigationBarTitleText": "萌友益站",
-    "navigationBarBackgroundColor": "#F8F8F8",
-    "backgroundColor": "#F8F8F8"
+    "navigationBarBackgroundColor": "#FF8C42",
+    "backgroundColor": "#F8F9FA"
   }
 }
