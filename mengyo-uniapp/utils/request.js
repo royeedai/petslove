@@ -2,7 +2,8 @@
  * 网络请求封装
  */
 
-const BASE_URL = 'http://localhost:8080/api'
+// 使用当前域名，服务端会转发到后端接口
+const BASE_URL = '/api'
 
 // 请求拦截器
 const request = (options) => {

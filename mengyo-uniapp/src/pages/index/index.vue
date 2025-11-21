@@ -137,8 +137,19 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { rescueApi, communityApi } from '@/utils/api'
 
-const banners = ref([])
+const banners = ref([
+  {
+    imageUrl: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800&q=80'
+  },
+  {
+    imageUrl: 'https://images.unsplash.com/photo-1415369629372-26f2fe60c467?w=800&q=80'
+  },
+  {
+    imageUrl: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=800&q=80'
+  }
+])
 const rescueList = ref([])
 const postList = ref([])
 
@@ -146,9 +157,32 @@ onMounted(() => {
   loadData()
 })
 
-const loadData = () => {
-  // TODO: 加载首页数据
-  console.log('加载首页数据')
+const loadData = async () => {
+  try {
+    // 加载最新救助任务
+    const rescueRes = await rescueApi.getTaskList({ page: 1, size: 3 })
+    if (rescueRes.data && rescueRes.data.records) {
+      rescueList.value = rescueRes.data.records.map(item => ({
+        ...item,
+        cover: item.cover || 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80'
+      }))
+    }
+  } catch (error) {
+    console.error('加载救助任务失败', error)
+  }
+
+  try {
+    // 加载社区动态
+    const postRes = await communityApi.getPostList({ page: 1, size: 3 })
+    if (postRes.data && postRes.data.records) {
+      postList.value = postRes.data.records.map(item => ({
+        ...item,
+        userAvatar: item.userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + item.userId
+      }))
+    }
+  } catch (error) {
+    console.error('加载社区动态失败', error)
+  }
 }
 
 const navigateTo = (url) => {

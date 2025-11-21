@@ -8,7 +8,7 @@
       
       <view class="user-info-wrapper">
         <image 
-          :src="userInfo?.avatar || '/static/default-avatar.png'" 
+          :src="userInfo?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
           mode="aspectFill" 
           class="user-avatar"
         ></image>
