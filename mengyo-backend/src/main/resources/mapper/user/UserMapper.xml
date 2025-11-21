@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mengyo.module.user.mapper.UserMapper">
+
+    <!-- 根据openid查询用户 -->
+    <select id="selectByOpenid" resultType="com.mengyo.module.user.entity.User">
+        SELECT * FROM user WHERE openid = #{openid} AND status = 1
+    </select>
+
+    <!-- 根据手机号查询用户 -->
+    <select id="selectByPhone" resultType="com.mengyo.module.user.entity.User">
+        SELECT * FROM user WHERE phone = #{phone} AND status = 1
+    </select>
+
+    <!-- 增加用户积分 -->
+    <update id="addPoints">
+        UPDATE user SET points = points + #{points} WHERE id = #{userId}
+    </update>
+
+    <!-- 扣减用户积分 -->
+    <update id="deductPoints">
+        UPDATE user 
+        SET points = CASE 
+            WHEN points >= #{points} THEN points - #{points}
+            ELSE points
+        END 
+        WHERE id = #{userId}
+    </update>
+
+</mapper>

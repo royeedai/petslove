@@ -105,3 +105,10 @@ file:
     path: /data/mengyo/upload/
     # 访问URL前缀
     url-prefix: http://localhost:8080/api/files/
+
+# 微信小程序配置
+wechat:
+  # 小程序AppID
+  appid: your_wechat_appid
+  # 小程序AppSecret
+  secret: your_wechat_secret
