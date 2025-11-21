@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <!-- 用户信息卡片 - Airbnb 风格留白设计 -->
+    <!-- 用户信息卡片 - Petfinder风格 -->
     <view class="user-section">
       <view class="user-card">
         <view class="user-bg">
@@ -13,6 +13,7 @@
             mode="aspectFill" 
             class="user-avatar"
             @error="handleAvatarError"
+            @click="handleEditProfile"
           ></image>
           
           <view class="user-detail">
@@ -26,7 +27,7 @@
           </view>
 
           <view v-if="userInfo" class="points-card" @click="navigateTo('/pages/user/points')">
-            <text class="points-label">我的积分</text>
+            <text class="points-label">积分</text>
             <text class="points-value">{{ userInfo?.points || 0 }}</text>
             <text class="points-arrow">›</text>
           </view>
@@ -36,23 +37,23 @@
         <view v-if="userInfo" class="stats-wrapper">
           <view class="stat-item" @click="navigateTo('/pages/user/rescue')">
             <text class="stat-value">{{ userStats.rescueCount || 0 }}</text>
-            <text class="stat-label">救助次数</text>
+            <text class="stat-label">救助</text>
           </view>
           <view class="stat-divider"></view>
           <view class="stat-item" @click="navigateTo('/pages/user/adoption')">
             <text class="stat-value">{{ userStats.adoptionCount || 0 }}</text>
-            <text class="stat-label">领养记录</text>
+            <text class="stat-label">领养</text>
           </view>
           <view class="stat-divider"></view>
           <view class="stat-item" @click="navigateTo('/pages/user/donation')">
             <text class="stat-value">{{ userStats.donationCount || 0 }}</text>
-            <text class="stat-label">捐赠次数</text>
+            <text class="stat-label">捐赠</text>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 快捷功能 - 更温馨的设计 -->
+    <!-- 快捷功能 -->
     <view class="quick-actions-section">
       <view class="quick-actions">
         <view class="action-item" @click="navigateTo('/pages/user/verify')">
@@ -91,7 +92,7 @@
       </view>
     </view>
 
-    <!-- 菜单列表 - Airbnb 风格留白 -->
+    <!-- 菜单列表 -->
     <view class="menu-section">
       <view class="menu-group">
         <text class="group-title">我的活动</text>
@@ -222,6 +223,12 @@ const handleAvatarError = () => {
   }
 }
 
+const handleEditProfile = () => {
+  if (userInfo.value) {
+    navigateTo('/pages/user/profile-edit')
+  }
+}
+
 const navigateTo = (url) => {
   if (!userInfo.value && url !== '/pages/login/index') {
     uni.navigateTo({
@@ -255,27 +262,26 @@ const handleLogout = () => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: var(--bg-page);
-  padding-bottom: var(--spacing-xl);
+  background: #F5F5F5;
+  padding-bottom: 40rpx;
 }
 
-/* 用户信息卡片 - Airbnb 风格留白 */
+/* 用户信息卡片 */
 .user-section {
-  padding: var(--spacing-lg);
+  padding: 24rpx 32rpx;
 }
 
 .user-card {
   position: relative;
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
+  background: #FFFFFF;
+  border-radius: 32rpx;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
 }
 
 .user-bg {
   height: 240rpx;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
   position: relative;
   overflow: hidden;
 }
@@ -292,72 +298,77 @@ const handleLogout = () => {
 
 .user-info-wrapper {
   position: relative;
-  padding: 0 var(--spacing-xl) var(--spacing-xl);
+  padding: 0 40rpx 40rpx;
   margin-top: -80rpx;
 }
 
 .user-avatar {
-  width: 140rpx;
-  height: 140rpx;
+  width: 160rpx;
+  height: 160rpx;
   border-radius: 50%;
-  border: 8rpx solid var(--bg-white);
-  box-shadow: var(--shadow-md);
-  background: var(--bg-warm);
+  border: 8rpx solid #FFFFFF;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+  background: #F5F5F5;
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .user-detail {
-  margin-top: var(--spacing-lg);
+  margin-top: 24rpx;
 }
 
 .user-name-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xs);
+  gap: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .user-nickname {
-  font-size: 40rpx;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #2C2C2C;
+  letter-spacing: -0.02em;
 }
 
 .verified-badge {
-  width: 40rpx;
-  height: 40rpx;
+  width: 48rpx;
+  height: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary-color);
+  background: #FF5A5F;
   border-radius: 50%;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4rpx 12rpx rgba(255, 90, 95, 0.3);
 }
 
 .verified-icon {
-  font-size: 22rpx;
-  color: #fff;
+  font-size: 28rpx;
+  color: #FFFFFF;
   font-weight: bold;
 }
 
 .user-phone {
   font-size: 28rpx;
-  color: var(--text-secondary);
+  color: #666;
 }
 
 .points-card {
   position: absolute;
-  top: var(--spacing-lg);
-  right: var(--spacing-xl);
+  top: 24rpx;
+  right: 40rpx;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
+  gap: 12rpx;
+  padding: 16rpx 32rpx;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10rpx);
-  border-radius: var(--radius-full);
+  border-radius: 50rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.5);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   
   &:active {
@@ -366,19 +377,19 @@ const handleLogout = () => {
 }
 
 .points-label {
-  font-size: 24rpx;
-  color: var(--text-secondary);
+  font-size: 26rpx;
+  color: #666;
 }
 
 .points-value {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: var(--primary-color);
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #FF5A5F;
 }
 
 .points-arrow {
-  font-size: 32rpx;
-  color: var(--primary-color);
+  font-size: 36rpx;
+  color: #FF5A5F;
   font-weight: 300;
 }
 
@@ -387,16 +398,16 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: var(--spacing-xl) 0 var(--spacing-md);
-  margin-top: var(--spacing-lg);
-  border-top: 1rpx solid var(--divider-color);
+  padding: 32rpx 0 24rpx;
+  margin-top: 24rpx;
+  border-top: 1rpx solid #F0F0F0;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 8rpx;
   flex: 1;
   transition: all 0.3s ease;
   
@@ -406,37 +417,36 @@ const handleLogout = () => {
 }
 
 .stat-value {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #2C2C2C;
+  letter-spacing: -0.02em;
 }
 
 .stat-label {
   font-size: 26rpx;
-  color: var(--text-secondary);
+  color: #666;
 }
 
 .stat-divider {
   width: 2rpx;
   height: 60rpx;
-  background: var(--divider-color);
+  background: #F0F0F0;
 }
 
-/* 快捷功能 - 更温馨的设计 */
+/* 快捷功能 */
 .quick-actions-section {
-  padding: 0 var(--spacing-lg) var(--spacing-xl);
+  padding: 0 32rpx 32rpx;
 }
 
 .quick-actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl);
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
+  gap: 24rpx;
+  padding: 32rpx;
+  background: #FFFFFF;
+  border-radius: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 
 .action-item {
@@ -444,21 +454,21 @@ const handleLogout = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 16rpx;
 }
 
 .action-icon-wrapper {
-  width: 100rpx;
-  height: 100rpx;
+  width: 120rpx;
+  height: 120rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   
   &.verify {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
   }
   
   &.favorites {
@@ -466,7 +476,7 @@ const handleLogout = () => {
   }
   
   &.messages {
-    background: linear-gradient(135deg, var(--info-color) 0%, #00C4B3 100%);
+    background: linear-gradient(135deg, #00A699 0%, #00C4B3 100%);
   }
   
   &.wallet {
@@ -479,12 +489,12 @@ const handleLogout = () => {
 }
 
 .action-icon {
-  font-size: 48rpx;
+  font-size: 56rpx;
 }
 
 .action-text {
   font-size: 26rpx;
-  color: var(--text-primary);
+  color: #2C2C2C;
   font-weight: 500;
 }
 
@@ -492,13 +502,13 @@ const handleLogout = () => {
   position: absolute;
   top: -8rpx;
   right: -8rpx;
-  padding: 4rpx 12rpx;
+  padding: 6rpx 16rpx;
   font-size: 20rpx;
-  border-radius: var(--radius-full);
+  border-radius: 50rpx;
   
   &.verified {
-    background: var(--success-color);
-    color: #fff;
+    background: #00A699;
+    color: #FFFFFF;
   }
 }
 
@@ -506,87 +516,86 @@ const handleLogout = () => {
   position: absolute;
   top: -8rpx;
   right: 0;
-  min-width: 36rpx;
-  height: 36rpx;
-  padding: 0 10rpx;
+  min-width: 40rpx;
+  height: 40rpx;
+  padding: 0 12rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--danger-color);
-  border-radius: var(--radius-full);
+  background: #FF5A5F;
+  border-radius: 50rpx;
   font-size: 20rpx;
-  color: #fff;
-  font-weight: 500;
-  box-shadow: var(--shadow-sm);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(255, 90, 95, 0.3);
 }
 
-/* 菜单组 - Airbnb 风格留白 */
+/* 菜单组 */
 .menu-section {
-  padding: 0 var(--spacing-lg);
+  padding: 0 32rpx;
 }
 
 .menu-group {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 32rpx;
 }
 
 .group-title {
   display: block;
-  padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm);
+  padding: 16rpx 16rpx 12rpx;
   font-size: 28rpx;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #2C2C2C;
   letter-spacing: -0.01em;
 }
 
 .menu-list {
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
+  background: #FFFFFF;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-xl);
-  border-bottom: 1rpx solid var(--divider-color);
+  padding: 32rpx;
+  border-bottom: 1rpx solid #F0F0F0;
   transition: all 0.3s ease;
-
+  
   &:last-child {
     border-bottom: none;
   }
-
+  
   &:active {
-    background: var(--bg-gray);
+    background: #F5F5F5;
   }
 }
 
 .menu-left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 24rpx;
 }
 
 .menu-icon {
-  font-size: 44rpx;
+  font-size: 48rpx;
 }
 
 .menu-text {
   font-size: 30rpx;
-  color: var(--text-primary);
+  color: #2C2C2C;
 }
 
 .menu-arrow {
   font-size: 40rpx;
-  color: var(--text-light);
+  color: #999;
   font-weight: 300;
 }
 
 /* 登录/退出按钮 */
 .action-section {
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: 32rpx;
 }
 
 .btn-login,
@@ -596,30 +605,30 @@ const handleLogout = () => {
   line-height: 96rpx;
   text-align: center;
   font-size: 32rpx;
-  font-weight: 500;
-  border-radius: var(--radius-full);
+  font-weight: 600;
+  border-radius: 16rpx;
   border: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-login {
-  color: #fff;
-  background: var(--primary-color);
-  box-shadow: var(--shadow-md);
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
+  box-shadow: 0 8rpx 24rpx rgba(255, 90, 95, 0.4);
   
   &:active {
-    background: var(--primary-dark);
+    background: linear-gradient(135deg, #E04A4F 0%, #FF6B70 100%);
     transform: scale(0.98);
   }
 }
 
 .btn-logout {
-  color: var(--text-secondary);
-  background: var(--bg-white);
-  border: 2rpx solid var(--border-color);
+  color: #666;
+  background: #FFFFFF;
+  border: 2rpx solid #F0F0F0;
   
   &:active {
-    background: var(--bg-gray);
+    background: #F5F5F5;
   }
 }
 </style>

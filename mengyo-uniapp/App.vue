@@ -15,52 +15,52 @@ onHide(() => {
 </script>
 
 <style lang="scss">
-/* 全局样式 - Pinterest/Airbnb 温馨风格 */
+/* 全局样式 - Petfinder风格 */
 :root {
-  /* 主色调 - 暖色系（参考 Airbnb 的珊瑚红/暖橙） */
+  /* 主色调 - Petfinder风格 */
   --primary-color: #FF5A5F;
   --primary-dark: #E04A4F;
   --primary-light: #FF7A7F;
   --primary-hover: #FF6B70;
   --primary-bg: #FFF5F5;
   
-  /* 辅助色 - 温馨暖色调 */
+  /* 辅助色 */
   --success-color: #00A699;
   --warning-color: #FCB900;
   --danger-color: #FF5A5F;
   --info-color: #00A699;
   
-  /* 文字颜色 - 柔和深色 */
+  /* 文字颜色 */
   --text-primary: #2C2C2C;
-  --text-secondary: #717171;
-  --text-light: #B0B0B0;
-  --text-disabled: #D0D0D0;
+  --text-secondary: #666;
+  --text-light: #999;
+  --text-disabled: #B0B0B0;
   
-  /* 背景色 - 暖白色系（参考 Airbnb 的米白色） */
-  --bg-page: #FEFEFE;
+  /* 背景色 */
+  --bg-page: #F5F5F5;
   --bg-white: #FFFFFF;
-  --bg-gray: #F7F7F7;
+  --bg-gray: #F5F5F5;
   --bg-warm: #FFFBF8;
   --bg-card: #FFFFFF;
   
-  /* 边框和分割线 - 更柔和的颜色 */
-  --border-color: #EBEBEB;
+  /* 边框和分割线 */
+  --border-color: #EEEEEE;
   --divider-color: #F0F0F0;
   
-  /* 阴影 - 更柔和、更轻的阴影（Airbnb 风格） */
-  --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
+  /* 阴影 - Petfinder风格 */
+  --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
   
-  /* 圆角 - 更大的圆角（Pinterest/Airbnb 风格） */
+  /* 圆角 */
   --radius-sm: 12rpx;
   --radius-md: 16rpx;
   --radius-lg: 24rpx;
   --radius-xl: 32rpx;
   --radius-full: 9999rpx;
   
-  /* 间距 - 更大的留白（Airbnb 风格） */
+  /* 间距 */
   --spacing-xs: 8rpx;
   --spacing-sm: 16rpx;
   --spacing-md: 24rpx;
@@ -78,19 +78,19 @@ page {
   letter-spacing: 0.01em;
 }
 
-/* 全局容器 - 增加留白 */
+/* 全局容器 */
 .container {
   padding: var(--spacing-lg);
 }
 
-/* 全局按钮 - 更圆润的设计 */
+/* 全局按钮 */
 .btn-primary {
   background: var(--primary-color);
   color: #fff;
-  border-radius: var(--radius-full);
-  padding: 20rpx 48rpx;
+  border-radius: var(--radius-md);
+  padding: 24rpx 48rpx;
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 30rpx;
   border: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -107,10 +107,10 @@ page {
   background-color: var(--bg-white);
   color: var(--text-primary);
   border: 2rpx solid var(--border-color);
-  border-radius: var(--radius-full);
-  padding: 20rpx 48rpx;
+  border-radius: var(--radius-md);
+  padding: 24rpx 48rpx;
   text-align: center;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 30rpx;
   transition: all 0.3s ease;
   
@@ -120,14 +120,13 @@ page {
   }
 }
 
-/* 全局卡片样式 - Pinterest 风格 */
+/* 全局卡片样式 */
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-card);
   margin-bottom: var(--spacing-md);
-  border: 1rpx solid var(--border-color);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
@@ -136,10 +135,10 @@ page {
   }
 }
 
-/* 全局标题 - 更好的行高和间距 */
+/* 全局标题 */
 .title {
   font-size: 40rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
   line-height: 1.5;
@@ -154,7 +153,7 @@ page {
   letter-spacing: 0.01em;
 }
 
-/* 图片加载错误处理 - 更温馨的设计 */
+/* 图片加载错误处理 */
 .image-error {
   background: var(--bg-warm);
   display: flex;
@@ -166,5 +165,124 @@ page {
     font-size: 80rpx;
     opacity: 0.2;
   }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.3);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10rpx);
+  }
+}
+
+/* 过渡动画类 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(30rpx);
 }
 </style>

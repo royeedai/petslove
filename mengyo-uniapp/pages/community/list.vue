@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <!-- 顶部发布入口 - 更温馨的设计 -->
+    <!-- 顶部发布入口 -->
     <view class="publish-section">
       <view class="publish-card" @click="handlePublish">
         <image 
@@ -18,7 +18,7 @@
       </view>
     </view>
 
-    <!-- 分类标签 - 更圆润的设计 -->
+    <!-- 分类标签 -->
     <scroll-view scroll-x class="category-scroll" :show-scrollbar="false">
       <view class="category-list">
         <view 
@@ -28,18 +28,19 @@
           :class="{ active: currentCategory === item.value }"
           @click="currentCategory = item.value"
         >
-          <text class="category-emoji">{{ item.emoji }}</text>
+          <text class="category-icon">{{ item.icon }}</text>
           <text class="category-text">{{ item.label }}</text>
         </view>
       </view>
     </scroll-view>
 
-    <!-- 社区动态列表 - Pinterest 风格卡片 -->
-    <view class="post-list">
+    <!-- 帖子列表 - Petfinder风格 -->
+    <view class="posts-container">
       <view 
-        v-for="item in postList" 
-        :key="item.id" 
+        v-for="(item, index) in postList" 
+        :key="item.id"
         class="post-card"
+        :style="{ animationDelay: `${index * 0.1}s` }"
         @click="handleDetail(item)"
       >
         <!-- 用户信息 -->
@@ -60,12 +61,12 @@
           </view>
         </view>
 
-        <!-- 动态内容 -->
+        <!-- 帖子内容 -->
         <view class="post-content" v-if="item.content">
           <text class="content-text">{{ item.content }}</text>
         </view>
 
-        <!-- 图片列表 - Pinterest 风格网格 -->
+        <!-- 图片网格 -->
         <view v-if="item.images && item.images.length > 0" class="image-grid" :class="getImageGridClass(item.images.length)">
           <image 
             v-for="(img, imgIndex) in item.images" 
@@ -76,18 +77,6 @@
             @error="handleImageError($event, 'image', imgIndex)"
             @click.stop="previewImage(item.images, imgIndex)"
           ></image>
-        </view>
-
-        <!-- 话题标签 -->
-        <view v-if="item.tags && item.tags.length > 0" class="tags-wrapper">
-          <view 
-            v-for="(tag, tagIndex) in item.tags" 
-            :key="tagIndex"
-            class="tag-item"
-            @click.stop="handleTag(tag)"
-          >
-            #{{ tag }}
-          </view>
         </view>
 
         <!-- 互动区域 -->
@@ -113,28 +102,18 @@
             <text class="action-text">分享</text>
           </view>
         </view>
-
-        <!-- 评论预览 -->
-        <view v-if="item.hotComments && item.hotComments.length > 0" class="comments-preview">
-          <view 
-            v-for="(comment, commentIndex) in item.hotComments" 
-            :key="commentIndex"
-            class="comment-item"
-          >
-            <text class="comment-user">{{ comment.userNickname }}：</text>
-            <text class="comment-content">{{ comment.content }}</text>
-          </view>
-          <view v-if="item.commentCount > 2" class="view-all-comments" @click.stop="handleComment(item)">
-            查看全部 {{ item.commentCount }} 条评论 ›
-          </view>
-        </view>
       </view>
 
       <!-- 空状态 -->
-      <view v-if="postList.length === 0" class="empty-state">
+      <view v-if="postList.length === 0 && !loading" class="empty-state">
         <text class="empty-icon">💬</text>
         <text class="empty-text">暂无社区动态</text>
         <text class="empty-desc">快来发布第一条动态吧</text>
+      </view>
+
+      <!-- 加载更多 -->
+      <view v-if="hasMore && postList.length > 0" class="load-more" @click="loadMore">
+        <text class="load-more-text">{{ loading ? '加载中...' : '加载更多' }}</text>
       </view>
     </view>
   </view>
@@ -146,26 +125,28 @@ import { communityApi } from '@/utils/api'
 
 const userInfo = ref(null)
 const currentCategory = ref('all')
+const loading = ref(false)
+const hasMore = ref(true)
+const currentPage = ref(1)
+const postList = ref([])
 
 const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
 
 const categories = ref([
-  { label: '全部', value: 'all', emoji: '📋' },
-  { label: '救助故事', value: 'rescue', emoji: '🆘' },
-  { label: '领养日记', value: 'adoption', emoji: '🏠' },
-  { label: '萌宠日常', value: 'daily', emoji: '🐾' },
-  { label: '求助', value: 'help', emoji: '❓' }
+  { label: '全部', value: 'all', icon: '📋' },
+  { label: '日常分享', value: 'DAILY', icon: '🐾' },
+  { label: '知识分享', value: 'KNOWLEDGE', icon: '📚' },
+  { label: '求助', value: 'HELP', icon: '🆘' },
+  { label: '故事', value: 'STORY', icon: '📖' }
 ])
-
-const postList = ref([])
 
 onMounted(() => {
   loadUserInfo()
-  loadData()
+  loadPosts()
 })
 
 watch(currentCategory, () => {
-  loadData()
+  loadPosts(true)
 })
 
 const loadUserInfo = () => {
@@ -175,10 +156,19 @@ const loadUserInfo = () => {
   }
 }
 
-const loadData = async () => {
+const loadPosts = async (reset = false) => {
+  if (loading.value) return
+  
+  loading.value = true
+  
+  if (reset) {
+    currentPage.value = 1
+    postList.value = []
+  }
+  
   try {
     const params = {
-      page: 1,
+      page: currentPage.value,
       size: 20
     }
     
@@ -188,13 +178,23 @@ const loadData = async () => {
     
     const res = await communityApi.getPostList(params)
     if (res.data && res.data.records) {
-      postList.value = res.data.records.map(item => ({
+      const newList = res.data.records.map(item => ({
         ...item,
         userAvatar: item.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.userId || 'default'}`,
         isLiked: false,
         likeCount: item.likeCount || 0,
-        commentCount: item.commentCount || 0
+        commentCount: item.commentCount || 0,
+        images: item.images ? (typeof item.images === 'string' ? JSON.parse(item.images) : item.images) : []
       }))
+      
+      if (reset) {
+        postList.value = newList
+      } else {
+        postList.value = [...postList.value, ...newList]
+      }
+      
+      hasMore.value = res.data.records.length === 20
+      currentPage.value++
     }
   } catch (error) {
     console.error('加载社区动态失败', error)
@@ -202,6 +202,14 @@ const loadData = async () => {
       title: '加载失败，请重试',
       icon: 'none'
     })
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadMore = () => {
+  if (!loading.value && hasMore.value) {
+    loadPosts()
   }
 }
 
@@ -255,7 +263,7 @@ const handleLike = async (item) => {
   }
   
   try {
-    const res = await communityApi.toggleLike('post', item.id)
+    const res = await communityApi.toggleLike('POST', item.id)
     item.isLiked = res.data.liked
     if (item.isLiked) {
       item.likeCount = (item.likeCount || 0) + 1
@@ -288,10 +296,6 @@ const handleShare = (item) => {
   uni.showShareMenu({
     withShareTicket: true
   })
-}
-
-const handleTag = (tag) => {
-  console.log('点击标签：', tag)
 }
 
 const handleDetail = (item) => {
@@ -338,29 +342,29 @@ const formatTime = (time) => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: var(--bg-page);
-  padding-bottom: var(--spacing-lg);
+  background: #F5F5F5;
+  padding-bottom: 40rpx;
 }
 
-/* 发布入口 - 更温馨的设计 */
+/* 发布入口 */
 .publish-section {
-  padding: var(--spacing-lg);
+  padding: 24rpx 32rpx;
+  background: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
 .publish-card {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 16rpx;
+  padding: 20rpx;
+  background: #F5F5F5;
+  border-radius: 24rpx;
+  transition: all 0.3s ease;
   
   &:active {
-    transform: translateY(-2rpx);
-    box-shadow: var(--shadow-md);
+    background: #EEEEEE;
+    transform: scale(0.98);
   }
 }
 
@@ -368,8 +372,8 @@ const formatTime = (time) => {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  border: 2rpx solid var(--border-color);
-  background: var(--bg-warm);
+  border: 2rpx solid #FFFFFF;
+  background: #F5F5F5;
   flex-shrink: 0;
 }
 
@@ -378,15 +382,12 @@ const formatTime = (time) => {
   height: 80rpx;
   display: flex;
   align-items: center;
-  padding: 0 var(--spacing-lg);
-  background: var(--bg-gray);
-  border-radius: var(--radius-full);
-  border: 1rpx solid var(--border-color);
+  padding: 0 24rpx;
 }
 
 .publish-placeholder {
   font-size: 28rpx;
-  color: var(--text-light);
+  color: #999;
 }
 
 .publish-btn {
@@ -395,14 +396,14 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary-color);
+  background: #FF5A5F;
   border-radius: 50%;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4rpx 12rpx rgba(255, 90, 95, 0.3);
   transition: all 0.3s ease;
   
   &:active {
     transform: scale(0.95);
-    background: var(--primary-dark);
+    background: #E04A4F;
   }
 }
 
@@ -410,44 +411,36 @@ const formatTime = (time) => {
   font-size: 40rpx;
 }
 
-/* 分类滚动 - 更圆润的设计 */
+/* 分类滚动 */
 .category-scroll {
   white-space: nowrap;
-  background: var(--bg-white);
-  padding: var(--spacing-lg) 0;
-  margin-bottom: var(--spacing-md);
-  border-bottom: 1rpx solid var(--border-color);
+  background: #FFFFFF;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #EEEEEE;
 }
 
 .category-list {
   display: inline-flex;
-  gap: var(--spacing-md);
-  padding: 0 var(--spacing-lg);
+  gap: 16rpx;
+  padding: 0 32rpx;
 }
 
 .category-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--bg-gray);
-  border-radius: var(--radius-full);
-  border: 1rpx solid var(--border-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-
+  padding: 12rpx 24rpx;
+  background: #F5F5F5;
+  border-radius: 50rpx;
+  transition: all 0.3s ease;
+  
   &.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-sm);
+    background: #FF5A5F;
+    box-shadow: 0 2rpx 8rpx rgba(255, 90, 95, 0.3);
     
     .category-text {
-      color: #fff;
+      color: #FFFFFF;
       font-weight: 600;
-    }
-    
-    .category-emoji {
-      filter: brightness(1.1);
     }
   }
   
@@ -456,71 +449,80 @@ const formatTime = (time) => {
   }
 }
 
-.category-emoji {
-  font-size: 32rpx;
+.category-icon {
+  font-size: 28rpx;
 }
 
 .category-text {
   font-size: 26rpx;
-  color: var(--text-secondary);
+  color: #666;
   white-space: nowrap;
 }
 
-/* 动态列表 - Pinterest 风格卡片 */
-.post-list {
-  padding: 0 var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
+/* 帖子列表 */
+.posts-container {
+  padding: 24rpx 32rpx;
 }
 
 .post-card {
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
+  margin-bottom: 32rpx;
+  padding: 32rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.6s ease-out both;
   
   &:active {
     transform: translateY(-2rpx);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .post-header {
   display: flex;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 24rpx;
 }
 
 .avatar {
   width: 88rpx;
   height: 88rpx;
   border-radius: 50%;
-  border: 2rpx solid var(--border-color);
-  background: var(--bg-warm);
+  border: 2rpx solid #F0F0F0;
+  background: #F5F5F5;
   flex-shrink: 0;
 }
 
 .user-info {
   flex: 1;
-  margin-left: var(--spacing-md);
+  margin-left: 16rpx;
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
+  gap: 8rpx;
   min-width: 0;
 }
 
 .nickname {
   font-size: 30rpx;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #2C2C2C;
 }
 
 .time {
   font-size: 24rpx;
-  color: var(--text-light);
+  color: #999;
 }
 
 .more-btn {
@@ -534,37 +536,37 @@ const formatTime = (time) => {
   transition: all 0.3s ease;
   
   &:active {
-    background: var(--bg-gray);
+    background: #F5F5F5;
   }
 }
 
 .more-icon {
   font-size: 40rpx;
-  color: var(--text-light);
+  color: #999;
   line-height: 1;
 }
 
-/* 动态内容 */
+/* 帖子内容 */
 .post-content {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 24rpx;
 }
 
 .content-text {
   font-size: 30rpx;
-  color: var(--text-primary);
+  color: #2C2C2C;
   line-height: 1.7;
   word-break: break-all;
   letter-spacing: 0.01em;
 }
 
-/* 图片网格 - Pinterest 风格 */
+/* 图片网格 */
 .image-grid {
   display: grid;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-  border-radius: var(--radius-lg);
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+  border-radius: 16rpx;
   overflow: hidden;
-
+  
   &.grid-1 {
     grid-template-columns: 1fr;
     
@@ -572,7 +574,7 @@ const formatTime = (time) => {
       height: 500rpx;
     }
   }
-
+  
   &.grid-2 {
     grid-template-columns: repeat(2, 1fr);
     
@@ -580,7 +582,7 @@ const formatTime = (time) => {
       height: 320rpx;
     }
   }
-
+  
   &.grid-3 {
     grid-template-columns: repeat(3, 1fr);
     
@@ -588,7 +590,7 @@ const formatTime = (time) => {
       height: 240rpx;
     }
   }
-
+  
   &.grid-4 {
     grid-template-columns: repeat(2, 1fr);
     
@@ -600,7 +602,7 @@ const formatTime = (time) => {
 
 .post-image {
   width: 100%;
-  background: var(--bg-warm);
+  background: #F5F5F5;
   transition: transform 0.3s ease;
   
   &:active {
@@ -608,56 +610,33 @@ const formatTime = (time) => {
   }
 }
 
-/* 标签 */
-.tags-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-}
-
-.tag-item {
-  padding: 8rpx 20rpx;
-  background: var(--primary-bg);
-  border-radius: var(--radius-full);
-  font-size: 26rpx;
-  color: var(--primary-color);
-  border: 1rpx solid rgba(255, 90, 95, 0.2);
-  transition: all 0.3s ease;
-  
-  &:active {
-    background: var(--primary-color);
-    color: #fff;
-  }
-}
-
 /* 互动区域 */
 .post-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xl);
-  padding-top: var(--spacing-lg);
-  border-top: 1rpx solid var(--divider-color);
+  gap: 32rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #F0F0F0;
 }
 
 .action-item {
   display: flex;
   align-items: center;
-  gap: 10rpx;
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: var(--bg-gray);
-  border-radius: var(--radius-full);
+  gap: 12rpx;
+  padding: 12rpx 24rpx;
+  background: #F5F5F5;
+  border-radius: 50rpx;
   transition: all 0.3s ease;
   
   &:active {
-    background: #E0E0E0;
+    background: #EEEEEE;
   }
 }
 
 .action-icon {
   font-size: 36rpx;
   transition: all 0.3s ease;
-
+  
   &.liked {
     animation: like 0.5s ease;
   }
@@ -674,40 +653,12 @@ const formatTime = (time) => {
 
 .action-text {
   font-size: 26rpx;
-  color: var(--text-secondary);
+  color: #666;
   
   &.active {
-    color: var(--primary-color);
+    color: #FF5A5F;
     font-weight: 500;
   }
-}
-
-/* 评论预览 */
-.comments-preview {
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1rpx solid var(--divider-color);
-}
-
-.comment-item {
-  font-size: 28rpx;
-  line-height: 1.7;
-  margin-bottom: var(--spacing-sm);
-}
-
-.comment-user {
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-.comment-content {
-  color: var(--text-primary);
-}
-
-.view-all-comments {
-  font-size: 26rpx;
-  color: var(--text-light);
-  margin-top: var(--spacing-sm);
 }
 
 /* 空状态 */
@@ -716,23 +667,41 @@ const formatTime = (time) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xxl) 0;
-  gap: var(--spacing-md);
+  padding: 120rpx 0;
+  gap: 24rpx;
 }
 
 .empty-icon {
-  font-size: 140rpx;
-  opacity: 0.25;
+  font-size: 120rpx;
+  opacity: 0.3;
 }
 
 .empty-text {
-  font-size: 30rpx;
-  color: var(--text-secondary);
+  font-size: 32rpx;
+  color: #666;
   font-weight: 500;
 }
 
 .empty-desc {
   font-size: 26rpx;
-  color: var(--text-light);
+  color: #999;
+}
+
+/* 加载更多 */
+.load-more {
+  margin-top: 32rpx;
+  padding: 32rpx;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.load-more-text {
+  font-size: 28rpx;
+  color: #FF5A5F;
+  font-weight: 500;
 }
 </style>

@@ -1,41 +1,14 @@
 <template>
   <view class="page">
-    <!-- 顶部统计栏 - 更温馨的设计 -->
-    <view class="stats-section">
-      <view class="stats-card">
-        <view class="stat-item">
-          <view class="stat-icon-wrapper rescue">
-            <text class="stat-icon">🆘</text>
-          </view>
-          <view class="stat-info">
-            <text class="stat-value">{{ totalRescue }}</text>
-            <text class="stat-label">救助中</text>
-          </view>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item">
-          <view class="stat-icon-wrapper completed">
-            <text class="stat-icon">✅</text>
-          </view>
-          <view class="stat-info">
-            <text class="stat-value">{{ completedRescue }}</text>
-            <text class="stat-label">已完成</text>
-          </view>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item">
-          <view class="stat-icon-wrapper volunteer">
-            <text class="stat-icon">👥</text>
-          </view>
-          <view class="stat-info">
-            <text class="stat-value">{{ totalVolunteer }}</text>
-            <text class="stat-label">志愿者</text>
-          </view>
-        </view>
+    <!-- 顶部搜索栏 -->
+    <view class="header-section">
+      <view class="search-bar" @click="handleSearch">
+        <text class="search-icon">🔍</text>
+        <text class="search-placeholder">搜索救助任务...</text>
       </view>
     </view>
 
-    <!-- 状态筛选 - 更圆润的设计 -->
+    <!-- 状态筛选标签 -->
     <scroll-view scroll-x class="status-scroll" :show-scrollbar="false">
       <view class="status-list">
         <view 
@@ -45,95 +18,96 @@
           :class="{ active: currentStatus === item.value }"
           @click="currentStatus = item.value"
         >
-          <text class="status-emoji">{{ item.emoji }}</text>
+          <text class="status-icon">{{ item.icon }}</text>
           <text class="status-text">{{ item.label }}</text>
         </view>
       </view>
     </scroll-view>
 
-    <!-- 救助任务列表 - Pinterest 风格卡片 -->
-    <view class="rescue-list">
+    <!-- 救助任务列表 - Petfinder风格 -->
+    <view class="tasks-container">
       <view 
-        v-for="item in rescueList" 
-        :key="item.id" 
-        class="rescue-card"
+        v-for="(item, index) in taskList" 
+        :key="item.id"
+        class="task-card"
+        :style="{ animationDelay: `${index * 0.1}s` }"
         @click="handleDetail(item)"
       >
-        <!-- 紧急标签 -->
-        <view v-if="item.urgencyLevel === 'urgent'" class="urgent-tag">
+        <!-- 紧急标记 -->
+        <view v-if="item.urgency === 'URGENT'" class="urgent-banner">
           <text class="urgent-icon">🚨</text>
           <text class="urgent-text">紧急求助</text>
         </view>
 
-        <view class="rescue-image-wrapper">
+        <view class="task-image-wrapper">
           <image 
-            :src="item.cover" 
+            :src="getTaskImage(item)" 
             mode="aspectFill" 
-            class="rescue-image"
-            @error="handleImageError($event, item.id)"
+            class="task-image"
+            @error="handleImageError($event, item)"
           ></image>
-        </view>
-        
-        <view class="rescue-content">
-          <text class="rescue-title">{{ item.title }}</text>
           
-          <view class="rescue-meta">
+          <view class="status-badge" :class="getStatusClass(item.status)">
+            <text class="status-text">{{ getStatusText(item.status) }}</text>
+          </view>
+        </view>
+
+        <view class="task-content">
+          <text class="task-title">{{ item.title }}</text>
+          
+          <view class="task-meta">
             <view class="meta-item">
               <text class="meta-icon">📍</text>
-              <text class="meta-text">{{ item.address || '位置待确认' }}</text>
+              <text class="meta-text">{{ getLocationText(item) }}</text>
             </view>
-            
-            <view class="meta-row">
-              <view class="meta-item">
-                <text class="meta-icon">⏰</text>
-                <text class="meta-text">{{ formatTime(item.createTime) }}</text>
-              </view>
-              <view class="meta-item">
-                <text class="meta-icon">👤</text>
-                <text class="meta-text">{{ item.reporterName || '匿名' }}</text>
-              </view>
+            <view class="meta-item">
+              <text class="meta-icon">⏰</text>
+              <text class="meta-text">{{ formatTime(item.createTime) }}</text>
             </view>
           </view>
 
-          <view class="rescue-desc" v-if="item.description">
+          <view class="task-desc" v-if="item.description">
             {{ item.description }}
           </view>
 
-          <view class="rescue-footer">
-            <view class="status-badge" :class="item.status">
-              <text class="status-dot"></text>
-              <text class="status-text">{{ getStatusText(item.status) }}</text>
+          <view class="task-footer">
+            <view class="animal-info">
+              <text class="animal-type-icon">{{ getAnimalIcon(item.animalType) }}</text>
+              <text class="animal-type-text">{{ getAnimalTypeText(item.animalType) }}</text>
             </view>
             
-            <view class="action-group">
-              <button 
-                v-if="item.status === 'pending'" 
-                class="btn-participate"
-                @click.stop="handleParticipate(item)"
-              >
-                <text class="btn-text">我要参与</text>
-              </button>
-              <button 
-                v-else-if="item.status === 'processing'" 
-                class="btn-detail"
-                @click.stop="handleProgress(item)"
-              >
-                <text class="btn-text">查看进度</text>
-              </button>
-            </view>
+            <button 
+              v-if="item.status === 'PUBLISHED'"
+              class="btn-accept"
+              @click.stop="handleAccept(item)"
+            >
+              <text class="btn-text">接受任务</text>
+            </button>
+            <button 
+              v-else-if="item.status === 'ACCEPTED'"
+              class="btn-progress"
+              @click.stop="handleProgress(item)"
+            >
+              <text class="btn-text">查看进度</text>
+            </button>
           </view>
         </view>
       </view>
 
       <!-- 空状态 -->
-      <view v-if="rescueList.length === 0" class="empty-state">
-        <text class="empty-icon">🔍</text>
+      <view v-if="taskList.length === 0 && !loading" class="empty-state">
+        <text class="empty-icon">🆘</text>
         <text class="empty-text">暂无救助任务</text>
         <text class="empty-desc">期待您的爱心参与</text>
       </view>
+
+      <!-- 加载更多 -->
+      <view v-if="hasMore && taskList.length > 0" class="load-more" @click="loadMore">
+        <text class="load-more-text">{{ loading ? '加载中...' : '加载更多' }}</text>
+      </view>
     </view>
 
-    <!-- 发布救助按钮 - 更温馨的设计 -->
+    <!-- 发布按钮 -->
     <view class="fab-btn" @click="handlePublish">
       <text class="fab-icon">+</text>
     </view>
@@ -144,36 +118,40 @@
 import { ref, onMounted, watch } from 'vue'
 import { rescueApi } from '@/utils/api'
 
-const totalRescue = ref(0)
-const completedRescue = ref(0)
-const totalVolunteer = ref(0)
-
 const currentStatus = ref('all')
+const loading = ref(false)
+const hasMore = ref(true)
+const currentPage = ref(1)
+const taskList = ref([])
 
 const statusTabs = ref([
-  { label: '全部', value: 'all', emoji: '📋' },
-  { label: '待救助', value: 'pending', emoji: '🆘' },
-  { label: '救助中', value: 'processing', emoji: '🏃' },
-  { label: '已完成', value: 'completed', emoji: '✅' }
+  { label: '全部', value: 'all', icon: '📋' },
+  { label: '待救助', value: 'PUBLISHED', icon: '🆘' },
+  { label: '救助中', value: 'ACCEPTED', icon: '🏃' },
+  { label: '已完成', value: 'COMPLETED', icon: '✅' }
 ])
 
-const rescueList = ref([])
-
-const defaultRescueImage = 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80'
-
 onMounted(() => {
-  loadData()
-  loadStats()
+  loadTasks()
 })
 
 watch(currentStatus, () => {
-  loadData()
+  loadTasks(true)
 })
 
-const loadData = async () => {
+const loadTasks = async (reset = false) => {
+  if (loading.value) return
+  
+  loading.value = true
+  
+  if (reset) {
+    currentPage.value = 1
+    taskList.value = []
+  }
+  
   try {
     const params = {
-      page: 1,
+      page: currentPage.value,
       size: 20
     }
     
@@ -183,97 +161,99 @@ const loadData = async () => {
     
     const res = await rescueApi.getTaskList(params)
     if (res.data && res.data.records) {
-      rescueList.value = res.data.records.map(item => ({
+      const newList = res.data.records.map(item => ({
         ...item,
-        cover: item.cover || defaultRescueImage
+        cover: item.cover || getDefaultImage()
       }))
+      
+      if (reset) {
+        taskList.value = newList
+      } else {
+        taskList.value = [...taskList.value, ...newList]
+      }
+      
+      hasMore.value = res.data.records.length === 20
+      currentPage.value++
     }
   } catch (error) {
-    console.error('加载救助任务列表失败', error)
+    console.error('加载救助任务失败', error)
     uni.showToast({
       title: '加载失败，请重试',
       icon: 'none'
     })
+  } finally {
+    loading.value = false
   }
 }
 
-const loadStats = async () => {
-  try {
-    const res = await rescueApi.getTaskList({ page: 1, size: 100 })
-    if (res.data && res.data.records) {
-      const records = res.data.records
-      totalRescue.value = records.filter(r => r.status === 'pending' || r.status === 'processing').length
-      completedRescue.value = records.filter(r => r.status === 'completed').length
-      totalVolunteer.value = 128
-    }
-  } catch (error) {
-    console.error('加载统计数据失败', error)
+const loadMore = () => {
+  if (!loading.value && hasMore.value) {
+    loadTasks()
   }
 }
 
-const handleImageError = (e, id) => {
-  console.log('图片加载失败', id)
-  const item = rescueList.value.find(r => r.id === id)
-  if (item) {
-    item.cover = defaultRescueImage
+const getTaskImage = (item) => {
+  if (item.cover) return item.cover
+  if (item.animalId && item.animalImages) {
+    const images = typeof item.animalImages === 'string' ? JSON.parse(item.animalImages) : item.animalImages
+    if (images && images.length > 0) return images[0]
   }
+  return getDefaultImage()
 }
 
-const handleDetail = (item) => {
-  uni.navigateTo({
-    url: `/pages/rescue/detail?id=${item.id}`
-  })
+const getDefaultImage = () => {
+  return 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80'
 }
 
-const handleParticipate = async (item) => {
-  uni.showModal({
-    title: '确认参与',
-    content: '确定要参与这个救助任务吗？',
-    confirmColor: '#FF5A5F',
-    success: async (res) => {
-      if (res.confirm) {
-        try {
-          uni.showLoading({ title: '提交中...' })
-          await rescueApi.acceptTask(item.id)
-          uni.hideLoading()
-          uni.showToast({
-            title: '参与成功',
-            icon: 'success'
-          })
-          loadData()
-        } catch (error) {
-          uni.hideLoading()
-          console.error('参与救助失败', error)
-          uni.showToast({
-            title: '参与失败，请重试',
-            icon: 'none'
-          })
-        }
-      }
-    }
-  })
+const handleImageError = (e, item) => {
+  item.cover = getDefaultImage()
 }
 
-const handleProgress = (item) => {
-  uni.navigateTo({
-    url: `/pages/rescue/progress?id=${item.id}`
-  })
-}
-
-const handlePublish = () => {
-  uni.navigateTo({
-    url: '/pages/rescue/publish'
-  })
+const getLocationText = (item) => {
+  if (item.locationAddress) return item.locationAddress
+  if (item.locationCity && item.locationDistrict) {
+    return `${item.locationCity} ${item.locationDistrict}`
+  }
+  if (item.locationCity) return item.locationCity
+  return '位置待确认'
 }
 
 const getStatusText = (status) => {
   const statusMap = {
-    'pending': '待救助',
-    'processing': '救助中',
-    'completed': '已完成',
-    'cancelled': '已取消'
+    'PUBLISHED': '待救助',
+    'ACCEPTED': '救助中',
+    'COMPLETED': '已完成',
+    'CANCELLED': '已取消'
   }
   return statusMap[status] || '未知'
+}
+
+const getStatusClass = (status) => {
+  const classMap = {
+    'PUBLISHED': 'published',
+    'ACCEPTED': 'accepted',
+    'COMPLETED': 'completed',
+    'CANCELLED': 'cancelled'
+  }
+  return classMap[status] || 'published'
+}
+
+const getAnimalIcon = (type) => {
+  const iconMap = {
+    'DOG': '🐕',
+    'CAT': '🐈',
+    'OTHER': '🦊'
+  }
+  return iconMap[type] || '🐾'
+}
+
+const getAnimalTypeText = (type) => {
+  const textMap = {
+    'DOG': '狗狗',
+    'CAT': '猫咪',
+    'OTHER': '其他'
+  }
+  return textMap[type] || '未知'
 }
 
 const formatTime = (time) => {
@@ -295,127 +275,131 @@ const formatTime = (time) => {
   
   return createTime.toLocaleDateString()
 }
+
+const handleDetail = (item) => {
+  uni.navigateTo({
+    url: `/pages/rescue/detail?id=${item.id}`
+  })
+}
+
+const handleAccept = async (item) => {
+  uni.showModal({
+    title: '确认接受',
+    content: '确定要接受这个救助任务吗？',
+    confirmColor: '#FF5A5F',
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          uni.showLoading({ title: '提交中...' })
+          await rescueApi.acceptTask(item.id)
+          uni.hideLoading()
+          uni.showToast({
+            title: '接受成功',
+            icon: 'success'
+          })
+          loadTasks(true)
+        } catch (error) {
+          uni.hideLoading()
+          console.error('接受任务失败', error)
+          uni.showToast({
+            title: '操作失败，请重试',
+            icon: 'none'
+          })
+        }
+      }
+    }
+  })
+}
+
+const handleProgress = (item) => {
+  uni.navigateTo({
+    url: `/pages/rescue/progress?id=${item.id}`
+  })
+}
+
+const handlePublish = () => {
+  uni.navigateTo({
+    url: '/pages/rescue/publish'
+  })
+}
+
+const handleSearch = () => {
+  uni.showToast({
+    title: '搜索功能开发中',
+    icon: 'none'
+  })
+}
 </script>
 
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: var(--bg-page);
-  padding-bottom: 160rpx;
+  background: #F5F5F5;
+  padding-bottom: 180rpx;
 }
 
-/* 统计栏 - 更温馨的设计 */
-.stats-section {
-  padding: var(--spacing-lg);
+/* 顶部搜索栏 */
+.header-section {
+  padding: 24rpx 32rpx;
+  background: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
-.stats-card {
+.search-bar {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: var(--spacing-xl);
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
+  gap: 16rpx;
+  padding: 20rpx 32rpx;
+  background: #F5F5F5;
+  border-radius: 50rpx;
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: #EEEEEE;
+  }
 }
 
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+.search-icon {
+  font-size: 32rpx;
+  color: #666;
+}
+
+.search-placeholder {
   flex: 1;
+  font-size: 28rpx;
+  color: #999;
 }
 
-.stat-icon-wrapper {
-  width: 80rpx;
-  height: 80rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  
-  &.rescue {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
-  }
-  
-  &.completed {
-    background: linear-gradient(135deg, #00A699 0%, #00C4B3 100%);
-  }
-  
-  &.volunteer {
-    background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
-  }
-}
-
-.stat-icon {
-  font-size: 44rpx;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
-.stat-label {
-  font-size: 24rpx;
-  color: var(--text-light);
-}
-
-.stat-divider {
-  width: 2rpx;
-  height: 60rpx;
-  background: var(--divider-color);
-}
-
-/* 状态筛选 - 更圆润的设计 */
+/* 状态筛选 */
 .status-scroll {
   white-space: nowrap;
-  background: var(--bg-white);
-  padding: var(--spacing-lg) 0;
-  margin-bottom: var(--spacing-md);
-  border-bottom: 1rpx solid var(--border-color);
+  background: #FFFFFF;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #EEEEEE;
 }
 
 .status-list {
   display: inline-flex;
-  gap: var(--spacing-md);
-  padding: 0 var(--spacing-lg);
+  gap: 16rpx;
+  padding: 0 32rpx;
 }
 
 .status-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--bg-gray);
-  border-radius: var(--radius-full);
-  border: 1rpx solid var(--border-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-
+  padding: 12rpx 24rpx;
+  background: #F5F5F5;
+  border-radius: 50rpx;
+  transition: all 0.3s ease;
+  
   &.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-sm);
+    background: #FF5A5F;
+    box-shadow: 0 2rpx 8rpx rgba(255, 90, 95, 0.3);
     
     .status-text {
-      color: #fff;
+      color: #FFFFFF;
       font-weight: 600;
-    }
-    
-    .status-emoji {
-      filter: brightness(1.1);
     }
   }
   
@@ -424,127 +408,162 @@ const formatTime = (time) => {
   }
 }
 
-.status-emoji {
-  font-size: 32rpx;
+.status-icon {
+  font-size: 28rpx;
 }
 
 .status-text {
   font-size: 26rpx;
-  color: var(--text-secondary);
+  color: #666;
   white-space: nowrap;
 }
 
-/* 救助任务列表 - Pinterest 风格卡片 */
-.rescue-list {
-  padding: 0 var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
+/* 任务列表 */
+.tasks-container {
+  padding: 24rpx 32rpx;
 }
 
-.rescue-card {
+.task-card {
   position: relative;
-  background: var(--bg-white);
-  border-radius: var(--radius-xl);
+  margin-bottom: 32rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
-  border: 1rpx solid var(--border-color);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.6s ease-out both;
   
   &:active {
     transform: translateY(-4rpx);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
   }
 }
 
-.urgent-tag {
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.urgent-banner {
   position: absolute;
-  top: var(--spacing-lg);
-  right: var(--spacing-lg);
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 10rpx 24rpx;
-  background: rgba(255, 90, 95, 0.95);
-  backdrop-filter: blur(10rpx);
-  border-radius: var(--radius-full);
+  justify-content: center;
+  gap: 12rpx;
+  padding: 16rpx;
+  background: linear-gradient(135deg, #FF5A5F 0%, #FF7A7F 100%);
+  color: #FFFFFF;
+  font-size: 28rpx;
+  font-weight: 600;
   z-index: 10;
-  box-shadow: var(--shadow-sm);
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
   0%, 100% {
-    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: scale(1.05);
+    opacity: 0.9;
   }
 }
 
 .urgent-icon {
-  font-size: 28rpx;
+  font-size: 32rpx;
 }
 
 .urgent-text {
-  font-size: 24rpx;
-  font-weight: 500;
-  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
 }
 
-.rescue-image-wrapper {
+.task-image-wrapper {
+  position: relative;
   width: 100%;
   height: 400rpx;
   overflow: hidden;
 }
 
-.rescue-image {
+.task-image {
   width: 100%;
   height: 100%;
-  background: var(--bg-warm);
+  background: #F5F5F5;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.rescue-card:active .rescue-image {
-  transform: scale(1.05);
+.task-card:active .task-image {
+  transform: scale(1.1);
 }
 
-.rescue-content {
-  padding: var(--spacing-xl);
+.status-badge {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  padding: 8rpx 20rpx;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10rpx);
+  border-radius: 50rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  
+  &.published {
+    .status-text {
+      color: #FF5A5F;
+    }
+  }
+  
+  &.accepted {
+    .status-text {
+      color: #FCB900;
+    }
+  }
+  
+  &.completed {
+    .status-text {
+      color: #00A699;
+    }
+  }
 }
 
-.rescue-title {
+.status-text {
+  font-size: 22rpx;
+}
+
+.task-content {
+  padding: 32rpx;
+}
+
+.task-title {
+  display: block;
   font-size: 36rpx;
   font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.5;
-  margin-bottom: var(--spacing-lg);
+  color: #2C2C2C;
+  margin-bottom: 24rpx;
   letter-spacing: -0.01em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: 1.5;
 }
 
-.rescue-meta {
+.task-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-}
-
-.meta-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
+  gap: 12rpx;
+  margin-bottom: 24rpx;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  flex: 1;
-  min-width: 0;
+  gap: 12rpx;
 }
 
 .meta-icon {
@@ -553,124 +572,82 @@ const formatTime = (time) => {
 }
 
 .meta-text {
+  flex: 1;
   font-size: 26rpx;
-  color: var(--text-secondary);
+  color: #666;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rescue-desc {
+.task-desc {
   font-size: 28rpx;
-  color: var(--text-secondary);
+  color: #666;
   line-height: 1.7;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 24rpx;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.rescue-footer {
+.task-footer {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding-top: var(--spacing-lg);
-  border-top: 1rpx solid var(--divider-color);
+  align-items: center;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #F0F0F0;
 }
 
-.status-badge {
+.animal-info {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 8rpx 20rpx;
-  border-radius: var(--radius-full);
-  font-size: 24rpx;
+  gap: 12rpx;
+}
+
+.animal-type-icon {
+  font-size: 36rpx;
+}
+
+.animal-type-text {
+  font-size: 28rpx;
+  color: #666;
   font-weight: 500;
-
-  &.pending {
-    background: #FFF3E0;
-    
-    .status-dot {
-      background: var(--warning-color);
-    }
-    
-    .status-text {
-      color: var(--warning-color);
-    }
-  }
-
-  &.processing {
-    background: #E8F5E9;
-    
-    .status-dot {
-      background: var(--success-color);
-    }
-    
-    .status-text {
-      color: var(--success-color);
-    }
-  }
-
-  &.completed {
-    background: #E3F2FD;
-    
-    .status-dot {
-      background: var(--primary-color);
-    }
-    
-    .status-text {
-      color: var(--primary-color);
-    }
-  }
 }
 
-.status-dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-}
-
-.action-group {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.btn-participate,
-.btn-detail {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--radius-full);
+.btn-accept,
+.btn-progress {
+  padding: 16rpx 32rpx;
+  border-radius: 16rpx;
   border: none;
   font-size: 28rpx;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
-.btn-participate {
-  background: var(--primary-color);
-  color: #fff;
-  box-shadow: var(--shadow-sm);
+.btn-accept {
+  background: #FF5A5F;
+  color: #FFFFFF;
+  box-shadow: 0 4rpx 12rpx rgba(255, 90, 95, 0.3);
   
   &:active {
-    background: var(--primary-dark);
+    background: #E04A4F;
     transform: scale(0.95);
   }
 }
 
-.btn-detail {
-  background: var(--bg-gray);
-  color: var(--text-secondary);
+.btn-progress {
+  background: #F5F5F5;
+  color: #666;
   
   &:active {
-    background: #E0E0E0;
+    background: #EEEEEE;
   }
 }
 
 .btn-text {
   font-size: 28rpx;
+  font-weight: 600;
 }
 
 /* 空状态 */
@@ -679,51 +656,69 @@ const formatTime = (time) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xxl) 0;
-  gap: var(--spacing-md);
+  padding: 120rpx 0;
+  gap: 24rpx;
 }
 
 .empty-icon {
-  font-size: 140rpx;
-  opacity: 0.25;
+  font-size: 120rpx;
+  opacity: 0.3;
 }
 
 .empty-text {
-  font-size: 30rpx;
-  color: var(--text-secondary);
+  font-size: 32rpx;
+  color: #666;
   font-weight: 500;
 }
 
 .empty-desc {
   font-size: 26rpx;
-  color: var(--text-light);
+  color: #999;
 }
 
-/* 发布按钮 - 更温馨的设计 */
+/* 加载更多 */
+.load-more {
+  margin-top: 32rpx;
+  padding: 32rpx;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.load-more-text {
+  font-size: 28rpx;
+  color: #FF5A5F;
+  font-weight: 500;
+}
+
+/* 发布按钮 */
 .fab-btn {
   position: fixed;
-  right: var(--spacing-xl);
-  bottom: 160rpx;
+  right: 32rpx;
+  bottom: 180rpx;
   width: 120rpx;
   height: 120rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary-color);
+  background: #FF5A5F;
   border-radius: 50%;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8rpx 24rpx rgba(255, 90, 95, 0.4);
   z-index: 100;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:active {
     transform: scale(0.95);
-    background: var(--primary-dark);
+    background: #E04A4F;
   }
 }
 
 .fab-icon {
-  font-size: 56rpx;
-  color: #fff;
+  font-size: 64rpx;
+  color: #FFFFFF;
   font-weight: 300;
   line-height: 1;
 }
