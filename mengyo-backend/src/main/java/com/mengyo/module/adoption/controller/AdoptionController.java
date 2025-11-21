@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Tag(name = "领养管理")
 @RestController
-@RequestMapping("/api/adoption")
+@RequestMapping("/adoption")
 @RequiredArgsConstructor
 public class AdoptionController {
 

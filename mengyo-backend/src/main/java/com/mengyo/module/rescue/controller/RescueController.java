@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Tag(name = "救助管理")
 @RestController
-@RequestMapping("/api/rescue")
+@RequestMapping("/rescue")
 @RequiredArgsConstructor
 public class RescueController {
 

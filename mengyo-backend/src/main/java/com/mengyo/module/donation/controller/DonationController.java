@@ -22,7 +22,7 @@ import java.util.Map;
  */
 @Tag(name = "捐赠管理")
 @RestController
-@RequestMapping("/api/donation")
+@RequestMapping("/donation")
 @RequiredArgsConstructor
 public class DonationController {
 

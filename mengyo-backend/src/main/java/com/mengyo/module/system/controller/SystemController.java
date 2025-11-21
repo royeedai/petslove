@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Tag(name = "系统管理")
 @RestController
-@RequestMapping("/api/system")
+@RequestMapping("/system")
 @RequiredArgsConstructor
 public class SystemController {
 
