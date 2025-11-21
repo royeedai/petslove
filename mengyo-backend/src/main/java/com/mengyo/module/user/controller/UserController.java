@@ -58,7 +58,7 @@ public class UserController {
             @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
             @RequestParam String phone) {
         userService.sendSmsCode(phone);
-        return Result.success("验证码已发送");
+        return Result.success();
     }
 
     @GetMapping("/info")
@@ -77,7 +77,7 @@ public class UserController {
             @RequestParam Long userId,
             @Valid @RequestBody UserUpdateRequest request) {
         userService.updateUserInfo(userId, request);
-        return Result.success("更新成功");
+        return Result.success();
     }
 
     @PostMapping("/verify")
@@ -87,7 +87,7 @@ public class UserController {
             @RequestParam Long userId,
             @Valid @RequestBody VerifyRequest request) {
         userService.verifyRealName(userId, request);
-        return Result.success("实名认证成功");
+        return Result.success();
     }
 
     @GetMapping("/points/records")
@@ -113,7 +113,7 @@ public class UserController {
             @Parameter(description = "积分描述")
             @RequestParam(required = false) String description) {
         userService.addPoints(userId, points, type, description);
-        return Result.success("积分增加成功");
+        return Result.success();
     }
 
     @PostMapping("/points/deduct")
@@ -128,7 +128,7 @@ public class UserController {
             @Parameter(description = "积分描述")
             @RequestParam(required = false) String description) {
         userService.deductPoints(userId, points, type, description);
-        return Result.success("积分扣减成功");
+        return Result.success();
     }
 
 }

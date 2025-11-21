@@ -1,0 +1,74 @@
+{
+  "groups": [
+    {
+      "name": "file.upload",
+      "type": "com.mengyo.config.FileUploadConfig",
+      "sourceType": "com.mengyo.config.FileUploadConfig"
+    },
+    {
+      "name": "file.upload.oss",
+      "type": "com.mengyo.config.FileUploadConfig$OssConfig",
+      "sourceType": "com.mengyo.config.FileUploadConfig",
+      "sourceMethod": "getOss()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "file.upload.oss.access-key-id",
+      "type": "java.lang.String",
+      "description": "访问密钥ID",
+      "sourceType": "com.mengyo.config.FileUploadConfig$OssConfig"
+    },
+    {
+      "name": "file.upload.oss.access-key-secret",
+      "type": "java.lang.String",
+      "description": "访问密钥密码",
+      "sourceType": "com.mengyo.config.FileUploadConfig$OssConfig"
+    },
+    {
+      "name": "file.upload.oss.bucket-name",
+      "type": "java.lang.String",
+      "description": "Bucket名称",
+      "sourceType": "com.mengyo.config.FileUploadConfig$OssConfig"
+    },
+    {
+      "name": "file.upload.oss.directory",
+      "type": "java.lang.String",
+      "description": "文件存储目录",
+      "sourceType": "com.mengyo.config.FileUploadConfig$OssConfig",
+      "defaultValue": "mengyo\/"
+    },
+    {
+      "name": "file.upload.oss.domain",
+      "type": "java.lang.String",
+      "description": "访问域名（自定义域名或OSS默认域名）",
+      "sourceType": "com.mengyo.config.FileUploadConfig$OssConfig"
+    },
+    {
+      "name": "file.upload.oss.endpoint",
+      "type": "java.lang.String",
+      "description": "OSS的Endpoint",
+      "sourceType": "com.mengyo.config.FileUploadConfig$OssConfig"
+    },
+    {
+      "name": "file.upload.path",
+      "type": "java.lang.String",
+      "description": "本地存储路径",
+      "sourceType": "com.mengyo.config.FileUploadConfig"
+    },
+    {
+      "name": "file.upload.storage-type",
+      "type": "java.lang.String",
+      "description": "存储类型：local-本地存储，oss-阿里云OSS",
+      "sourceType": "com.mengyo.config.FileUploadConfig",
+      "defaultValue": "local"
+    },
+    {
+      "name": "file.upload.url-prefix",
+      "type": "java.lang.String",
+      "description": "访问URL前缀",
+      "sourceType": "com.mengyo.config.FileUploadConfig"
+    }
+  ],
+  "hints": []
+}

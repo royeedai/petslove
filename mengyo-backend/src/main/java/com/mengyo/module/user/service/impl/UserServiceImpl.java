@@ -169,7 +169,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         
         // 验证成功后删除验证码
         if (savedCode.equals(code)) {
-            redisUtil.del(key);
+            redisUtil.delete(key);
             return true;
         }
         
