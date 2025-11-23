@@ -18,8 +18,11 @@ spring:
 # 服务器配置
 server:
   port: 8080
-  servlet:
-    context-path: /api
+
+# API 前缀配置，兼容是否带 /api 访问
+mengyo:
+  api:
+    prefix: /api
 
 # MyBatis Plus配置
 mybatis-plus:

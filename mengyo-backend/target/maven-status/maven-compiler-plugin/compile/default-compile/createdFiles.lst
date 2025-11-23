@@ -77,6 +77,7 @@ com/mengyo/module/donation/controller/DonationController.class
 com/mengyo/module/user/entity/User.class
 com/mengyo/module/donation/entity/DonationRecord.class
 com/mengyo/module/system/entity/Banner.class
+com/mengyo/config/ApiPrefixForwardFilter.class
 com/mengyo/config/MetaObjectHandlerConfig.class
 com/mengyo/module/user/controller/UserController.class
 com/mengyo/common/constant/RedisKeyConstant.class
