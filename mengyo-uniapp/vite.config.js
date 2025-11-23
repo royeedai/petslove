@@ -4,10 +4,8 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     uni()
   ],
-  build: {
-    outDir: path.resolve(__dirname, '../public/uniapp')
-  }
 })

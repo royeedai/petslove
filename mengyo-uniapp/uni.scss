@@ -1,0 +1,82 @@
+/* 
+  Design System - Theme A (Warm Orange / 暖橙公益风) 
+  Reference: RSPCA, Petfinder, Airbnb
+*/
+
+// Color Palette - Scheme A
+$color-primary: #F6A95B;
+$color-primary-light: #FFE9D6;
+$color-accent: #FF7F50;
+$color-text-main: #1F2937;
+$color-text-sub: #6B7280;
+$color-text-light: #9CA3AF;
+$color-bg: #FAFAF9;
+$color-white: #FFFFFF;
+
+// Semantic Colors
+$color-success: #52C41A;
+$color-warning: #FAAD14;
+$color-error: #FF4D4F;
+$color-info: #1890FF;
+
+// Spacing & Layout
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 24px;
+$spacing-xxl: 32px;
+
+// Radius
+$radius-sm: 4px;
+$radius-btn: 8px;
+$radius-card: 12px;
+$radius-lg: 20px;
+$radius-full: 999px;
+
+// Shadows
+$shadow-sm: 0 1px 2px rgba(31, 41, 55, 0.05);
+$shadow-card: 0 4px 14px rgba(31, 41, 55, 0.06);
+$shadow-float: 0 8px 24px rgba(31, 41, 55, 0.12);
+
+// Typography
+$font-size-h1: 24px;
+$font-size-h2: 20px;
+$font-size-h3: 17px;
+$font-size-body: 15px;
+$font-size-sm: 13px;
+$font-size-xs: 11px;
+
+$line-height-base: 1.6;
+
+// Mixins
+@mixin card-base {
+  background: $color-white;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Reset & Global
+page {
+  background-color: $color-bg;
+  color: $color-text-main;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}
+
+.container {
+  padding: $spacing-lg;
+  box-sizing: border-box;
+}
