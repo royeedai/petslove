@@ -3,37 +3,45 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "萌友益站"
-      }
-    },
-    {
-      "path": "pages/rescue/list",
-      "style": {
-        "navigationBarTitleText": "救助任务"
+        "navigationBarTitleText": "萌友益站",
+        "navigationBarStyle": "custom",
+        "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/animal/list",
       "style": {
-        "navigationBarTitleText": "流浪动物"
+        "navigationBarTitleText": "领养/助养",
+        "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/animal/detail",
       "style": {
-        "navigationBarTitleText": "宠物详情"
+        "navigationBarTitleText": "宠物档案",
+        "navigationBarStyle": "custom"
       }
     },
     {
-      "path": "pages/community/list",
+      "path": "pages/animal/success",
       "style": {
-        "navigationBarTitleText": "社区"
+        "navigationBarTitleText": "感谢您的爱心",
+        "navigationBarBackgroundColor": "#F6A95B",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/rescue/list",
+      "style": {
+        "navigationBarTitleText": "救助故事"
       }
     },
     {
       "path": "pages/user/index",
       "style": {
-        "navigationBarTitleText": "我的"
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#FAFAF9",
+        "navigationBarTextStyle": "black"
       }
     },
     {
@@ -41,11 +49,17 @@
       "style": {
         "navigationBarTitleText": "登录"
       }
+    },
+    {
+      "path": "pages/community/list",
+      "style": {
+        "navigationBarTitleText": "社区"
+      }
     }
   ],
   "tabBar": {
-    "color": "#B0B0B0",
-    "selectedColor": "#FF5A5F",
+    "color": "#9CA3AF",
+    "selectedColor": "#F6A95B",
     "borderStyle": "white",
     "backgroundColor": "#ffffff",
     "list": [
@@ -56,22 +70,16 @@
         "text": "首页"
       },
       {
-        "pagePath": "pages/rescue/list",
-        "iconPath": "static/tabbar/rescue.png",
-        "selectedIconPath": "static/tabbar/rescue-active.png",
-        "text": "救助"
-      },
-      {
         "pagePath": "pages/animal/list",
         "iconPath": "static/tabbar/animal.png",
         "selectedIconPath": "static/tabbar/animal-active.png",
-        "text": "动物"
+        "text": "领养"
       },
       {
-        "pagePath": "pages/community/list",
-        "iconPath": "static/tabbar/community.png",
-        "selectedIconPath": "static/tabbar/community-active.png",
-        "text": "社区"
+        "pagePath": "pages/rescue/list",
+        "iconPath": "static/tabbar/rescue.png",
+        "selectedIconPath": "static/tabbar/rescue-active.png",
+        "text": "故事"
       },
       {
         "pagePath": "pages/user/index",
@@ -82,9 +90,9 @@
     ]
   },
   "globalStyle": {
-    "navigationBarTextStyle": "white",
+    "navigationBarTextStyle": "black",
     "navigationBarTitleText": "萌友益站",
-    "navigationBarBackgroundColor": "#FF5A5F",
-    "backgroundColor": "#FEFEFE"
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#FAFAF9"
   }
 }
