@@ -1,7 +1,7 @@
 # 萌友益站 - API接口文档汇总
 
 **版本**: v1.0  
-**Base URL**: `http://localhost:8080/api`  
+**Base URL**: `http://localhost:8080/api` （同时兼容不带 `/api` 前缀的 `http://localhost:8080`）  
 **更新日期**: 2025-11-21
 
 ---

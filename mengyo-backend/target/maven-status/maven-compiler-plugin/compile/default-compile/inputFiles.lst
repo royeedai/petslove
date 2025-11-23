@@ -25,6 +25,7 @@
 /workspace/mengyo-backend/src/main/java/com/mengyo/module/system/service/SystemService.java
 /workspace/mengyo-backend/src/main/java/com/mengyo/module/community/entity/Post.java
 /workspace/mengyo-backend/src/main/java/com/mengyo/module/user/dto/UserUpdateRequest.java
+/workspace/mengyo-backend/src/main/java/com/mengyo/config/ApiPrefixForwardFilter.java
 /workspace/mengyo-backend/src/main/java/com/mengyo/module/system/service/FileUploadService.java
 /workspace/mengyo-backend/src/main/java/com/mengyo/module/user/dto/VerifyRequest.java
 /workspace/mengyo-backend/src/main/java/com/mengyo/module/donation/mapper/DonationRecordMapper.java
