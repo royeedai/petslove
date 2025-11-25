@@ -3,29 +3,38 @@
     <!-- 用户信息卡片 -->
     <view class="user-card">
       <view class="user-bg">
-        <view class="bg-pattern"></view>
+        <view class="bg-pattern-1"></view>
+        <view class="bg-pattern-2"></view>
+        <view class="bg-pattern-3"></view>
       </view>
       
       <view class="user-info-wrapper">
-        <image 
-          :src="userInfo?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
-          mode="aspectFill" 
-          class="user-avatar"
-        ></image>
+        <view class="avatar-wrapper" @click="handleAvatarClick">
+          <image 
+            :src="userInfo?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
+            mode="aspectFill" 
+            class="user-avatar"
+          ></image>
+          <view v-if="userInfo?.isVerified" class="verified-badge">
+            <text class="verified-icon">✓</text>
+          </view>
+        </view>
         
         <view class="user-detail">
           <view class="user-name-row">
             <text class="user-nickname">{{ userInfo?.nickname || '未登录' }}</text>
-            <view v-if="userInfo?.isVerified" class="verified-badge">
-              <text class="verified-icon">✓</text>
-            </view>
           </view>
           <text class="user-phone">{{ userInfo?.phone || '点击登录' }}</text>
         </view>
 
         <view v-if="userInfo" class="points-card" @click="navigateTo('/pages/user/points')">
-          <text class="points-label">我的积分</text>
-          <text class="points-value">{{ userInfo?.points || 0 }}</text>
+          <view class="points-icon-wrapper">
+            <text class="points-icon">💰</text>
+          </view>
+          <view class="points-info">
+            <text class="points-label">我的积分</text>
+            <text class="points-value">{{ userInfo?.points || 0 }}</text>
+          </view>
           <text class="points-arrow">›</text>
         </view>
       </view>
@@ -52,7 +61,7 @@
     <!-- 快捷功能 -->
     <view class="quick-actions">
       <view class="action-item" @click="navigateTo('/pages/user/verify')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);">
+        <view class="action-icon-wrapper verify">
           <text class="action-icon">✓</text>
         </view>
         <text class="action-text">实名认证</text>
@@ -62,14 +71,14 @@
       </view>
 
       <view class="action-item" @click="navigateTo('/pages/user/favorites')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);">
+        <view class="action-icon-wrapper favorite">
           <text class="action-icon">❤️</text>
         </view>
         <text class="action-text">我的收藏</text>
       </view>
 
       <view class="action-item" @click="navigateTo('/pages/user/messages')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);">
+        <view class="action-icon-wrapper message">
           <text class="action-icon">📧</text>
         </view>
         <text class="action-text">消息通知</text>
@@ -79,7 +88,7 @@
       </view>
 
       <view class="action-item" @click="navigateTo('/pages/user/wallet')">
-        <view class="action-icon-wrapper" style="background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);">
+        <view class="action-icon-wrapper wallet">
           <text class="action-icon">💰</text>
         </view>
         <text class="action-text">我的钱包</text>
@@ -162,6 +171,9 @@
         退出登录
       </button>
     </view>
+    
+    <!-- 底部间距 -->
+    <view class="page-footer"></view>
   </view>
 </template>
 
@@ -204,7 +216,33 @@ const loadUserInfo = async () => {
 
 const loadUserStats = async () => {
   // TODO: 加载用户统计数据
-  console.log('加载用户统计数据')
+  userStats.value = {
+    rescueCount: 5,
+    adoptionCount: 2,
+    donationCount: 8
+  }
+}
+
+const handleAvatarClick = () => {
+  if (!userInfo.value) {
+    uni.navigateTo({
+      url: '/pages/login/index'
+    })
+    return
+  }
+  
+  uni.chooseImage({
+    count: 1,
+    sizeType: ['compressed'],
+    sourceType: ['album', 'camera'],
+    success: (res) => {
+      console.log('选择的图片', res.tempFilePaths)
+      uni.showToast({
+        title: '头像上传功能开发中',
+        icon: 'none'
+      })
+    }
+  })
 }
 
 const navigateTo = (url) => {
@@ -214,7 +252,11 @@ const navigateTo = (url) => {
     })
     return
   }
-  uni.navigateTo({ url })
+  
+  uni.showToast({
+    title: '页面开发中',
+    icon: 'none'
+  })
 }
 
 const handleLogout = () => {
@@ -240,116 +282,190 @@ const handleLogout = () => {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  background: #F8F9FA;
-  padding-bottom: 40rpx;
+  background: linear-gradient(180deg, #FFFBF5 0%, #FEF7F0 100%);
+  padding-top: env(safe-area-inset-top);
 }
 
-/* 用户信息卡片 */
+/* ===================================
+   用户信息卡片
+   =================================== */
+
 .user-card {
   position: relative;
   margin: 24rpx 24rpx 20rpx;
-  background: #fff;
-  border-radius: 32rpx;
+  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  border-radius: 40rpx;
   overflow: hidden;
-  box-shadow: 0 8rpx 32rpx rgba(255, 140, 66, 0.12);
+  box-shadow: 0 8rpx 32rpx rgba(255, 140, 66, 0.25);
 }
 
 .user-bg {
-  height: 200rpx;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
 }
 
-.bg-pattern {
+.bg-pattern-1 {
   position: absolute;
-  top: -50%;
-  right: -20%;
+  top: -50rpx;
+  right: -50rpx;
+  width: 300rpx;
+  height: 300rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.bg-pattern-2 {
+  position: absolute;
+  bottom: -100rpx;
+  left: -100rpx;
   width: 400rpx;
   height: 400rpx;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
   border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-pattern-3 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 7s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20rpx) scale(1.05);
+  }
 }
 
 .user-info-wrapper {
   position: relative;
-  padding: 0 32rpx 32rpx;
-  margin-top: -60rpx;
+  padding: 40rpx 32rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.avatar-wrapper {
+  position: relative;
+  align-self: center;
 }
 
 .user-avatar {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  border: 6rpx solid #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  border: 6rpx solid #FFFFFF;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
+}
+
+.verified-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.verified-icon {
+  font-size: 24rpx;
+  color: #059669;
+  font-weight: bold;
 }
 
 .user-detail {
-  margin-top: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .user-name-row {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  margin-bottom: 8rpx;
 }
 
 .user-nickname {
   font-size: 36rpx;
-  font-weight: 600;
-  color: #2C3E50;
-}
-
-.verified-badge {
-  width: 36rpx;
-  height: 36rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  border-radius: 50%;
-}
-
-.verified-icon {
-  font-size: 20rpx;
-  color: #fff;
-  font-weight: bold;
+  font-weight: 700;
+  color: #FFFFFF;
 }
 
 .user-phone {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .points-card {
-  position: absolute;
-  top: 20rpx;
-  right: 32rpx;
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  padding: 16rpx 24rpx;
-  background: linear-gradient(135deg, rgba(255, 157, 92, 0.15) 0%, rgba(255, 127, 41, 0.15) 100%);
-  border-radius: 40rpx;
-  border: 2rpx solid rgba(255, 140, 66, 0.3);
+  gap: 16rpx;
+  padding: 20rpx 28rpx;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20rpx);
+  border-radius: 24rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.points-icon-wrapper {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+}
+
+.points-icon {
+  font-size: 32rpx;
+}
+
+.points-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
 }
 
 .points-label {
   font-size: 22rpx;
-  color: #7F8C8D;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .points-value {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #FF8C42;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #FFFFFF;
 }
 
 .points-arrow {
-  font-size: 28rpx;
-  color: #FF8C42;
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 300;
 }
 
@@ -360,7 +476,7 @@ const handleLogout = () => {
   justify-content: space-around;
   padding: 32rpx 0 8rpx;
   margin-top: 20rpx;
-  border-top: 1rpx solid #E8EAED;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.3);
 }
 
 .stat-item {
@@ -371,32 +487,37 @@ const handleLogout = () => {
 }
 
 .stat-value {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #2C3E50;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
 }
 
 .stat-label {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .stat-divider {
   width: 2rpx;
   height: 60rpx;
-  background: #E8EAED;
+  background: rgba(255, 255, 255, 0.3);
 }
 
-/* 快捷功能 */
+/* ===================================
+   快捷功能
+   =================================== */
+
 .quick-actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24rpx;
-  padding: 32rpx 24rpx;
-  margin: 0 24rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  padding: 32rpx;
+  margin: 0 24rpx 20rpx;
+  background: linear-gradient(to bottom right, #FFFFFF 0%, #FEF7F0 100%);
+  border-radius: 32rpx;
+  border: 1rpx solid #F5F5F4;
+  box-shadow: 0 4rpx 20rpx rgba(255, 140, 66, 0.08);
 }
 
 .action-item {
@@ -405,6 +526,11 @@ const handleLogout = () => {
   flex-direction: column;
   align-items: center;
   gap: 12rpx;
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .action-icon-wrapper {
@@ -414,7 +540,23 @@ const handleLogout = () => {
   align-items: center;
   justify-content: center;
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 16rpx rgba(255, 140, 66, 0.12);
+  
+  &.verify {
+    background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  }
+  
+  &.favorite {
+    background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);
+  }
+  
+  &.message {
+    background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);
+  }
+  
+  &.wallet {
+    background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
+  }
 }
 
 .action-icon {
@@ -423,7 +565,8 @@ const handleLogout = () => {
 
 .action-text {
   font-size: 24rpx;
-  color: #2C3E50;
+  color: #57534E;
+  font-weight: 500;
 }
 
 .action-status {
@@ -433,10 +576,11 @@ const handleLogout = () => {
   padding: 4rpx 12rpx;
   font-size: 20rpx;
   border-radius: 20rpx;
+  font-weight: 600;
   
   &.verified {
-    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
-    color: #28A745;
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+    color: #059669;
   }
 }
 
@@ -450,32 +594,36 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FF4757;
+  background: #EF4444;
   border-radius: 20rpx;
   font-size: 20rpx;
-  color: #fff;
-  font-weight: 500;
-  box-shadow: 0 2rpx 8rpx rgba(255, 71, 87, 0.3);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.35);
 }
 
-/* 菜单组 */
+/* ===================================
+   菜单组
+   =================================== */
+
 .menu-group {
-  margin: 20rpx 24rpx 0;
+  margin: 0 24rpx 20rpx;
 }
 
 .group-title {
   display: block;
   padding: 20rpx 16rpx 16rpx;
   font-size: 28rpx;
-  font-weight: 600;
-  color: #2C3E50;
+  font-weight: 700;
+  color: #57534E;
 }
 
 .menu-list {
-  background: #fff;
-  border-radius: 24rpx;
+  background: linear-gradient(to bottom right, #FFFFFF 0%, #FEF7F0 100%);
+  border-radius: 32rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  border: 1rpx solid #F5F5F4;
+  box-shadow: 0 4rpx 20rpx rgba(255, 140, 66, 0.08);
 }
 
 .menu-item {
@@ -483,7 +631,7 @@ const handleLogout = () => {
   align-items: center;
   justify-content: space-between;
   padding: 32rpx;
-  border-bottom: 1rpx solid #F8F9FA;
+  border-bottom: 1rpx solid #F5F5F4;
   transition: all 0.3s ease;
 
   &:last-child {
@@ -491,7 +639,7 @@ const handleLogout = () => {
   }
 
   &:active {
-    background: #F8F9FA;
+    background: #FEF7F0;
   }
 }
 
@@ -507,16 +655,20 @@ const handleLogout = () => {
 
 .menu-text {
   font-size: 28rpx;
-  color: #2C3E50;
+  color: #57534E;
+  font-weight: 500;
 }
 
 .menu-arrow {
   font-size: 36rpx;
-  color: #95A5A6;
+  color: #A8A29E;
   font-weight: 300;
 }
 
-/* 登录/退出按钮 */
+/* ===================================
+   登录/退出按钮
+   =================================== */
+
 .action-section {
   padding: 40rpx 24rpx;
 }
@@ -528,21 +680,29 @@ const handleLogout = () => {
   line-height: 88rpx;
   text-align: center;
   font-size: 30rpx;
-  font-weight: 500;
-  border-radius: 16rpx;
+  font-weight: 600;
+  border-radius: 24rpx;
   border: none;
   transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 .btn-login {
-  color: #fff;
+  color: #FFFFFF;
   background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.25);
 }
 
 .btn-logout {
-  color: #7F8C8D;
-  background: #fff;
-  border: 2rpx solid #E8EAED;
+  color: #78716C;
+  background: #FFFFFF;
+  border: 2rpx solid #F5F5F4;
+}
+
+.page-footer {
+  height: 40rpx;
 }
 </style>
