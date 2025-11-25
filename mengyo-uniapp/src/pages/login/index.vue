@@ -54,7 +54,7 @@
       <!-- 手机登录 -->
       <view v-else class="login-form">
         <view class="form-group">
-          <view class="input-wrapper">
+          <view class="input-wrapper" :class="{ focused: phoneFocused }">
             <text class="input-icon">📱</text>
             <input 
               v-model="phone" 
@@ -63,12 +63,14 @@
               maxlength="11"
               class="form-input"
               placeholder-class="input-placeholder"
+              @focus="phoneFocused = true"
+              @blur="phoneFocused = false"
             />
           </view>
         </view>
         
         <view class="form-group">
-          <view class="input-wrapper">
+          <view class="input-wrapper" :class="{ focused: codeFocused }">
             <text class="input-icon">🔐</text>
             <input 
               v-model="code" 
@@ -77,6 +79,8 @@
               maxlength="6"
               class="form-input code-input"
               placeholder-class="input-placeholder"
+              @focus="codeFocused = true"
+              @blur="codeFocused = false"
             />
             <button 
               class="btn-code" 
@@ -96,21 +100,19 @@
 
       <!-- 协议条款 -->
       <view class="agreement">
-        <checkbox-group @change="handleAgreeChange">
-          <label class="agreement-label">
-            <checkbox 
-              :checked="agreeTerms" 
-              color="#FF8C42"
-              class="agreement-checkbox"
-            />
-            <text class="agreement-text">
-              我已阅读并同意
-              <text class="agreement-link" @click.stop="handleProtocol('user')">《用户协议》</text>
-              和
-              <text class="agreement-link" @click.stop="handleProtocol('privacy')">《隐私政策》</text>
-            </text>
-          </label>
-        </checkbox-group>
+        <label class="agreement-label" @click="toggleAgree">
+          <view class="checkbox-wrapper">
+            <view class="checkbox" :class="{ checked: agreeTerms }">
+              <text v-if="agreeTerms" class="check-icon">✓</text>
+            </view>
+          </view>
+          <text class="agreement-text">
+            我已阅读并同意
+            <text class="agreement-link" @click.stop="handleProtocol('user')">《用户协议》</text>
+            和
+            <text class="agreement-link" @click.stop="handleProtocol('privacy')">《隐私政策》</text>
+          </text>
+        </label>
       </view>
     </view>
 
@@ -125,7 +127,7 @@
       <view class="other-methods">
         <view class="method-item" @click="handleAppleLogin">
           <view class="method-icon apple">
-            <text class="icon-text"></text>
+            <text class="icon-symbol"></text>
           </view>
           <text class="method-name">Apple</text>
         </view>
@@ -143,6 +145,13 @@ const phone = ref('')
 const code = ref('')
 const countdown = ref(0)
 const agreeTerms = ref(false)
+const phoneFocused = ref(false)
+const codeFocused = ref(false)
+
+// 切换协议同意状态
+const toggleAgree = () => {
+  agreeTerms.value = !agreeTerms.value
+}
 
 // 微信登录
 const handleWxLogin = () => {
@@ -315,18 +324,15 @@ const handlePhoneLogin = async () => {
   }
 }
 
-const handleAgreeChange = (e) => {
-  agreeTerms.value = e.detail.value.length > 0
-}
-
 const handleProtocol = (type) => {
   const urlMap = {
     'user': '/pages/protocol/user',
     'privacy': '/pages/protocol/privacy'
   }
   
-  uni.navigateTo({
-    url: urlMap[type]
+  uni.showToast({
+    title: '协议页面开发中',
+    icon: 'none'
   })
 }
 
@@ -342,12 +348,16 @@ const handleAppleLogin = () => {
 .page {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #FFF5EE 0%, #FFEEE0 100%);
+  background: linear-gradient(180deg, #FFFBF5 0%, #FEF7F0 100%);
   padding: 60rpx 40rpx;
+  padding-top: calc(env(safe-area-inset-top) + 60rpx);
   overflow: hidden;
 }
 
-/* 装饰背景 */
+/* ===================================
+   装饰背景
+   =================================== */
+
 .bg-decoration {
   position: absolute;
   top: 0;
@@ -362,6 +372,7 @@ const handleAppleLogin = () => {
   position: absolute;
   border-radius: 50%;
   opacity: 0.1;
+  animation: float 8s ease-in-out infinite;
 }
 
 .circle-1 {
@@ -370,6 +381,7 @@ const handleAppleLogin = () => {
   background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
   top: -100rpx;
   right: -100rpx;
+  animation-delay: 0s;
 }
 
 .circle-2 {
@@ -378,6 +390,7 @@ const handleAppleLogin = () => {
   background: linear-gradient(135deg, #FFB88C 0%, #FF9D5C 100%);
   bottom: 100rpx;
   left: -80rpx;
+  animation-delay: 2s;
 }
 
 .circle-3 {
@@ -386,9 +399,13 @@ const handleAppleLogin = () => {
   background: linear-gradient(135deg, #FFDCC5 0%, #FFB88C 100%);
   top: 50%;
   right: 40rpx;
+  animation-delay: 4s;
 }
 
-/* Logo 区域 */
+/* ===================================
+   Logo 区域
+   =================================== */
+
 .logo-section {
   position: relative;
   z-index: 1;
@@ -411,15 +428,6 @@ const handleAppleLogin = () => {
   animation: bounce 2s infinite;
 }
 
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10rpx);
-  }
-}
-
 .logo-emoji {
   font-size: 88rpx;
 }
@@ -427,24 +435,28 @@ const handleAppleLogin = () => {
 .app-name {
   font-size: 48rpx;
   font-weight: 700;
-  color: #2C3E50;
+  color: #57534E;
   margin-bottom: 16rpx;
 }
 
 .app-slogan {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: #78716C;
   letter-spacing: 2rpx;
 }
 
-/* 登录卡片 */
+/* ===================================
+   登录卡片
+   =================================== */
+
 .login-card {
   position: relative;
   z-index: 1;
-  background: #fff;
-  border-radius: 32rpx;
+  background: linear-gradient(to bottom right, #FFFFFF 0%, #FEF7F0 100%);
+  border-radius: 40rpx;
   padding: 48rpx 40rpx;
-  box-shadow: 0 16rpx 64rpx rgba(0, 0, 0, 0.08);
+  border: 1rpx solid #F5F5F4;
+  box-shadow: 0 16rpx 64rpx rgba(255, 140, 66, 0.12);
   margin-bottom: 40rpx;
 }
 
@@ -460,15 +472,16 @@ const handleAppleLogin = () => {
   flex-direction: column;
   align-items: center;
   gap: 12rpx;
-  padding: 24rpx;
-  background: #F8F9FA;
-  border-radius: 20rpx;
+  padding: 28rpx;
+  background: #FEF7F0;
+  border-radius: 24rpx;
   border: 3rpx solid transparent;
   transition: all 0.3s ease;
 
   &.active {
     background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
     border-color: #FF8C42;
+    transform: scale(1.05);
 
     .tab-icon {
       transform: scale(1.2);
@@ -476,19 +489,23 @@ const handleAppleLogin = () => {
 
     .tab-text {
       color: #FF8C42;
-      font-weight: 600;
+      font-weight: 700;
     }
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 
 .tab-icon {
-  font-size: 40rpx;
+  font-size: 44rpx;
   transition: all 0.3s ease;
 }
 
 .tab-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: #78716C;
   transition: all 0.3s ease;
 }
 
@@ -508,7 +525,7 @@ const handleAppleLogin = () => {
 
 .info-text {
   font-size: 26rpx;
-  color: #7F8C8D;
+  color: #78716C;
 }
 
 .btn-wechat {
@@ -519,9 +536,9 @@ const handleAppleLogin = () => {
   justify-content: center;
   gap: 16rpx;
   background: linear-gradient(135deg, #09BB07 0%, #07A600 100%);
-  border-radius: 20rpx;
+  border-radius: 24rpx;
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(9, 187, 7, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(9, 187, 7, 0.25);
   transition: all 0.3s ease;
 
   &:active {
@@ -535,8 +552,8 @@ const handleAppleLogin = () => {
 
 .btn-wechat .btn-text {
   font-size: 32rpx;
-  font-weight: 500;
-  color: #fff;
+  font-weight: 600;
+  color: #FFFFFF;
 }
 
 /* 手机登录 */
@@ -550,13 +567,13 @@ const handleAppleLogin = () => {
   align-items: center;
   gap: 16rpx;
   padding: 24rpx;
-  background: #F8F9FA;
-  border-radius: 20rpx;
+  background: #FEF7F0;
+  border-radius: 24rpx;
   border: 2rpx solid transparent;
   transition: all 0.3s ease;
 
-  &:focus-within {
-    background: #fff;
+  &.focused {
+    background: #FFFFFF;
     border-color: #FF8C42;
     box-shadow: 0 4rpx 20rpx rgba(255, 140, 66, 0.15);
   }
@@ -569,11 +586,11 @@ const handleAppleLogin = () => {
 .form-input {
   flex: 1;
   font-size: 28rpx;
-  color: #2C3E50;
+  color: #57534E;
 }
 
 .input-placeholder {
-  color: #95A5A6;
+  color: #D6D3D1;
 }
 
 .code-input {
@@ -583,18 +600,22 @@ const handleAppleLogin = () => {
 .btn-code {
   position: absolute;
   right: 20rpx;
-  padding: 12rpx 24rpx;
+  padding: 16rpx 28rpx;
   font-size: 24rpx;
-  color: #FF8C42;
-  background: linear-gradient(135deg, #FFE5D9 0%, #FFDCC5 100%);
-  border-radius: 16rpx;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+  border-radius: 20rpx;
   border: none;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
 
   &.disabled {
-    color: #95A5A6;
-    background: #E8EAED;
+    color: #A8A29E;
+    background: #E7E5E4;
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 
@@ -605,9 +626,9 @@ const handleAppleLogin = () => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
-  border-radius: 20rpx;
+  border-radius: 24rpx;
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(255, 140, 66, 0.25);
   margin-top: 40rpx;
   transition: all 0.3s ease;
 
@@ -618,8 +639,8 @@ const handleAppleLogin = () => {
 
 .btn-login .btn-text {
   font-size: 32rpx;
-  font-weight: 500;
-  color: #fff;
+  font-weight: 600;
+  color: #FFFFFF;
 }
 
 /* 协议 */
@@ -633,24 +654,49 @@ const handleAppleLogin = () => {
   gap: 12rpx;
 }
 
-.agreement-checkbox {
-  margin-top: 4rpx;
-  transform: scale(0.9);
+.checkbox-wrapper {
+  padding-top: 4rpx;
+}
+
+.checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FEF7F0;
+  border: 2rpx solid #E7E5E4;
+  border-radius: 8rpx;
+  transition: all 0.3s ease;
+  
+  &.checked {
+    background: linear-gradient(135deg, #FF9D5C 0%, #FF7F29 100%);
+    border-color: #FF8C42;
+  }
+}
+
+.check-icon {
+  font-size: 24rpx;
+  color: #FFFFFF;
+  font-weight: bold;
 }
 
 .agreement-text {
   flex: 1;
   font-size: 22rpx;
-  color: #7F8C8D;
-  line-height: 1.6;
+  color: #78716C;
+  line-height: 1.7;
 }
 
 .agreement-link {
   color: #FF8C42;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* 其他登录方式 */
+/* ===================================
+   其他登录方式
+   =================================== */
+
 .other-login {
   position: relative;
   z-index: 1;
@@ -666,12 +712,12 @@ const handleAppleLogin = () => {
 .divider-line {
   flex: 1;
   height: 2rpx;
-  background: #E8EAED;
+  background: #E7E5E4;
 }
 
 .divider-text {
   font-size: 24rpx;
-  color: #95A5A6;
+  color: #A8A29E;
 }
 
 .other-methods {
@@ -685,6 +731,11 @@ const handleAppleLogin = () => {
   flex-direction: column;
   align-items: center;
   gap: 16rpx;
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .method-icon {
@@ -694,21 +745,21 @@ const handleAppleLogin = () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #fff;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
   
   &.apple {
-    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+    background: linear-gradient(135deg, #57534E 0%, #44403C 100%);
   }
 }
 
-.icon-text {
+.icon-symbol {
   font-size: 44rpx;
-  color: #fff;
+  color: #FFFFFF;
 }
 
 .method-name {
   font-size: 24rpx;
-  color: #7F8C8D;
+  color: #78716C;
+  font-weight: 500;
 }
 </style>
